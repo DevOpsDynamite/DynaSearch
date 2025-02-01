@@ -96,13 +96,10 @@ def search():
     """Shows the search page."""
     q = request.args.get('q', None)
     language = request.args.get('language', "en")
-    
     if not q:
         search_results = []
     else:
-        sql_query = "SELECT * FROM pages WHERE language = ? AND content LIKE ?"
-        print(f"Executing SQL: {sql_query} with values: {language}, %{q}%")  # Debugging line
-        search_results = query_db(sql_query, (language, f"%{q}%"))
+        search_results = query_db("SELECT * FROM pages WHERE language = '%s' AND content LIKE '%%%s%%'" % (language, q))
 
     return render_template('search.html', search_results=search_results, query=q)
 
