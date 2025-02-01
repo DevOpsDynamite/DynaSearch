@@ -12,7 +12,7 @@ from flask import Flask, request, session, url_for, redirect, render_template, g
 # Configuration
 ################################################################################
 
-DATABASE_PATH = './whoknows.db'
+DATABASE_PATH = '../whoknows.db'
 PER_PAGE = 30
 DEBUG = False
 SECRET_KEY = 'development key'
@@ -96,10 +96,13 @@ def search():
     """Shows the search page."""
     q = request.args.get('q', None)
     language = request.args.get('language', "en")
+    
     if not q:
         search_results = []
     else:
-        search_results = query_db("SELECT * FROM pages WHERE language = '%s' AND content LIKE '%%%s%%'" % (language, q))
+        sql_query = "SELECT * FROM pages WHERE language = ? AND content LIKE ?"
+        print(f"Executing SQL: {sql_query} with values: {language}, %{q}%")  # Debugging line
+        search_results = query_db(sql_query, (language, f"%{q}%"))
 
     return render_template('search.html', search_results=search_results, query=q)
 
