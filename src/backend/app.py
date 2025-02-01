@@ -1,3 +1,4 @@
+##Deleted this import statement for migrating from p2 to p3
 #from __future__ import with_statement
 import os
 import sys
@@ -31,7 +32,7 @@ def connect_db(init_mode=False):
         check_db_exists()
     return sqlite3.connect(DATABASE_PATH)
 
-
+#Added () around the print statement to migrate from p2 -> p3
 def check_db_exists():
     """Checks if the database exists."""
     db_exists = os.path.exists(DATABASE_PATH)
@@ -41,7 +42,7 @@ def check_db_exists():
     else:
         return db_exists
 
-
+#Added () around the print statement to migrate from p2 -> p3
 def init_db():
     """Creates the database tables."""
     with closing(connect_db(init_mode=True)) as db:
