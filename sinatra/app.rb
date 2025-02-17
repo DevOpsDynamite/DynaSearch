@@ -1,10 +1,41 @@
 require 'sinatra'
+require 'sqlite3'
+require 'json'
+require 'sinatra/contrib'
 
 set :port, 4568
 
-#Get pages
+DB_PATH = File.expand_path('../whoknows.db', __FILE__)
+
+configure do
+  # Check if DB exists 
+  unless File.exist?(DB_PATH)
+    puts "Database not found at #{DB_PATH}"
+    exit(1)
+  end
+
+  # Create a single, shared SQLite connection
+  set :db, SQLite3::Database.new(DB_PATH)
+
+  # This line makes SQLite return results as a hash instead of arrays,
+  # so we can do row['column_name'] rather than row[0].
+  settings.db.results_as_hash = true
+end
+
+helpers do
+  def db
+    settings.db
+  end
+end
+
+
+
+# Basic route to test DB
 get '/' do
-  'Hello, World!'
+  # Example query: just read from a table called 'pages'
+  results = db.execute('SELECT * FROM pages LIMIT 10')
+  # Convert the results to JSON just to see them
+  results.to_json
 end
 
 get '/weather' do
