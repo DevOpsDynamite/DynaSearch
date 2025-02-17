@@ -17,4 +17,4 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - run: ruby -e 'puts "hello from ruby"'
-        working-directory: ./sinatra
+        working-directory: sinatra
