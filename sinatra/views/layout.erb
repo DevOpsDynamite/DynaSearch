@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <title>¿Who Knows?</title>
+  <!-- Sinatra will serve from /public by default if you name it public/ -->
+  <link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="navigation">
+      <nav>
+        <h1><a id="nav-logo" href="/">¿Who Knows?</a></h1>
+        
+        <% if session[:user] %>
+          <!-- Example if you store user data in session[:user] -->
+          <a id="nav-logout" href="/logout">Log out [<%= session[:user]['username'] %>]</a>
+        <% else %>
+          <a id="nav-login" href="/login">Log in</a>
+          <a id="nav-register" href="/register">Register</a>
+        <% end %>
+      </nav>
+    </div>
+
+    <!-- Example of flash messages (if using sinatra-flash) -->
+    <% if flash[:notice] %>
+      <ul class="flashes">
+        <li><%= flash[:notice] %></li>
+      </ul>
+    <% end %>
+
+    <div class="body">
+      <!-- This is where the specific page template is rendered -->
+      <%= yield %>
+    </div>
+    <div class="footer">
+      <span>¿Who Knows? &copy; 2009</span>
+      <a href="/about">About</a>
+    </div>
+  </div>
+</body>
+</html>

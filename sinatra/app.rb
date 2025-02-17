@@ -1,9 +1,17 @@
 require 'sinatra'
+require 'sinatra/flash'
 require 'sqlite3'
 require 'json'
 require 'sinatra/contrib'
 
 set :port, 4568
+
+register Sinatra::Flash
+
+################################################################################ 
+# Database Functions
+################################################################################
+
 
 DB_PATH = File.expand_path('../whoknows.db', __FILE__)
 
@@ -29,14 +37,27 @@ helpers do
 end
 
 
+################################################################################
+# Page Routes
+################################################################################
 
-# Basic route to test DB
 get '/' do
-  # Example query: just read from a table called 'pages'
-  results = db.execute('SELECT * FROM pages LIMIT 10')
-  # Convert the results to JSON just to see them
-  results.to_json
+  q = params[:q]
+  language = params[:language] || 'en'
+
+  if q.nil? || q.empty?
+    @search_results = []
+  else
+    @search_results = db.execute(
+      "SELECT * FROM pages WHERE language = ? AND content LIKE ?",
+      [language, "%#{q}%"]
+    )
+  end
+
+  # Render the ERB template named "search"
+  erb :search  
 end
+
 
 get '/weather' do
   'This is weather page'
