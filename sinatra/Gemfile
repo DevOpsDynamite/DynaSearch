@@ -4,3 +4,5 @@ gem 'sinatra'
 gem 'sqlite3'
 gem 'sinatra-contrib' 
 gem 'sinatra-flash'
+gem "rackup", "~> 2.2"
+gem "puma", "~> 6.6"
