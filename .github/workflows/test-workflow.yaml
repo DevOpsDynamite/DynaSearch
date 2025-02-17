@@ -11,10 +11,11 @@ jobs:
   workflow-with-ruby:
     runs-on: ubuntu-latest
     steps:
-      # - uses: actions/checkout@v4 #
+      - uses: actions/checkout@v4 #
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4"
-          working-directory: sinatra
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - run: ruby -e 'puts "hello from ruby"'
+        working-directory: sinatra
+
