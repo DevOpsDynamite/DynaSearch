@@ -1,4 +1,4 @@
-name: Workflow template
+name: Test workflow with Ruby
 
 on:
   workflow_dispatch:
