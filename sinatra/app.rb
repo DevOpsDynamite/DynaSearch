@@ -5,6 +5,7 @@ require 'json'
 require 'sinatra/contrib'
 require 'dotenv/load'
 require 'digest'
+require 'bcrypt'
 
 
 set :port, 4568
@@ -136,9 +137,9 @@ end
 ################################################################################ 
 
 def hash_password(password)
-  Digest::MD5.hexdigest(password)
+  BCrypt::Password.create(password)
 end
 
 def verify_password(stored_hash, password)
-  stored_hash == hash_password(password)
+  BCrypt::Password.new(stored_hash) == password
 end
