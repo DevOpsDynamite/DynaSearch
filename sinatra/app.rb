@@ -117,9 +117,9 @@ post '/api/login' do
   user = db.execute("SELECT * FROM users WHERE username = ?", username).first
 
   if user.nil?
-    error = "Invalid username"
+    error = "Invalid username or password"
   elsif !verify_password(user["password"], password)
-    error = "Invalid password"
+    error = "Invalid username or password"
   else
     flash[:notice] = "You were logged in"
     session[:user_id] = user["id"]
