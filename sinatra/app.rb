@@ -76,8 +76,13 @@ get '/weather' do
 end
 
 get '/register' do
-  'This is register page'
+  if current_user
+    redirect '/'
+  else
+    erb :register  
+  end
 end
+
 
 get '/login' do
   if current_user
@@ -101,7 +106,7 @@ end
 
 
 ################################################################################ 
-# POST pages
+# POST API pages
 ################################################################################ 
 
 
@@ -130,6 +135,45 @@ get '/api/logout' do
   session.clear 
   redirect '/'
 end
+
+post '/api/register' do
+  # If the user is already logged in, redirect to the search page
+  if current_user
+    redirect '/'
+  end
+
+  error = nil
+
+  # Validate input
+  if params[:username].to_s.strip.empty?
+    error = 'You have to enter a username'
+  elsif params[:email].to_s.strip.empty? || !params[:email].include?('@')
+    error = 'You have to enter a valid email address'
+  elsif params[:password].to_s.strip.empty?
+    error = 'You have to enter a password'
+  elsif params[:password] != params[:password2]
+    error = 'The two passwords do not match'
+  elsif db.execute("SELECT id FROM users WHERE username = ?", params[:username]).first
+    error = 'The username is already taken'
+  end
+
+  if error
+    # Re-render the registration form with an error message
+    erb :register, locals: { error: error }
+  else
+    # Hash the password using BCrypt
+    hashed_password = hash_password(params[:password])
+    
+    # Insert the new user into the database
+    db.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+    [params[:username], params[:email], hashed_password])
+
+    
+    flash[:notice] = 'You were successfully registered and can login now'
+    redirect '/login'
+  end
+end
+
 
 
 ################################################################################ 
