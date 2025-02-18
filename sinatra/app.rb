@@ -3,8 +3,13 @@ require 'sinatra/flash'
 require 'sqlite3'
 require 'json'
 require 'sinatra/contrib'
+require 'dotenv/load'
+require 'digest'
+
 
 set :port, 4568
+enable :sessions
+set :session_secret, ENV['SESSION_SECRET'] || 'fallback_secret'
 
 register Sinatra::Flash
 
@@ -33,6 +38,12 @@ end
 helpers do
   def db
     settings.db
+  end
+
+  def current_user
+    if session[:user_id]
+      @current_user ||= db.execute("SELECT * FROM users WHERE id = ?", session[:user_id]).first
+    end
   end
 end
 
@@ -68,8 +79,13 @@ get '/register' do
 end
 
 get '/login' do
-  'This is login page'
+  if current_user
+    redirect '/'
+  else
+    erb :login
+  end
 end
+
 
 #GET api pages
 get '/api/search' do
@@ -80,17 +96,49 @@ get '/api/weather' do
   'Test api weather'
 end
 
-get '/api/logout' do
-  'Test api logout'
-end
 
+
+
+################################################################################ 
 # POST pages
+################################################################################ 
 
-# POST api pags
+
 post '/api/login' do
-  'Check login'
+  username = params[:username]
+  password = params[:password]
+
+  user = db.execute("SELECT * FROM users WHERE username = ?", username).first
+
+  if user.nil?
+    error = "Invalid username"
+  elsif !verify_password(user["password"], password)
+    error = "Invalid password"
+  else
+    flash[:notice] = "You were logged in"
+    session[:user_id] = user["id"]
+    redirect '/'
+  end
+
+  # If there's an error, render the login page with error message
+  erb :login, locals: { error: error }
 end
 
-post '/api/logout' do
-  'Check logout'
+get '/api/logout' do
+  flash[:notice] = "You were logged out"
+  session.clear 
+  redirect '/'
+end
+
+
+################################################################################ 
+#Security functions
+################################################################################ 
+
+def hash_password(password)
+  Digest::MD5.hexdigest(password)
+end
+
+def verify_password(stored_hash, password)
+  stored_hash == hash_password(password)
 end
