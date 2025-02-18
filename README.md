@@ -1,24 +1,54 @@
-# Whoknows Variations
+# DevOpsDynamite
 
-This is the Whoknows variations repository. It is not meant for production as it contains several security vulnerabilities and problematic parts on purpose. 
+A simple Ruby project using Sinatra refining legacy code in Python3, creating a simple search engine.
 
-## How to get started
+## Prerequisites
 
-Each branch is a tutorial in a different topic based on the same Flask application as in the `main` branch. 
+Make sure you have **Ruby** and **Bundler** installed.
 
-One way to follow along is by:
+## Installation & Setup
 
-1. Forking the repository to your own account.
+### 1. Check your Ruby version
+Run:
+```sh
+ruby -v
+```
+If the version is below **2.7**, update Ruby.
 
-2. Cloning the repository to your local machine.
+### 2. Update Ruby (if necessary)
+Install Ruby using **Homebrew**:
+```sh
+brew install ruby
+```
+Ensure your system uses the newest version:
+```sh
+echo 'export PATH="/opt/homebrew/opt/ruby/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
 
-3. Checking out the branch you are interested in (e.g. `git checkout <branch_name>`).
+### 3. Install dependencies
+Run:
+```sh
+bundle install
+```
+If `bundle install` doesn’t work due to Ruby version issues, ensure you've updated Ruby as shown above.
 
-4. Following the instructions in the README of the branch.
+### 4. Install Puma & Rack (if needed)
+If you run into issues, install **Puma** and **Rack** manually:
+```sh
+gem install rackup puma
+```
 
-5. You can now push changes to your own repository. 
+### 5. Run the application
+Start the Sinatra app with:
+```sh
+ruby app.rb
+```
 
-## Pull requests
+## Notes
+- If you encounter missing dependencies, re-run `bundle install`.
+- If running the app fails with **rackup/puma errors**, install them using `gem install rackup puma`.
 
-If you have any suggestions or improvements to the tutorials, feel free to open a pull request.
+---
 
+This ensures that everything is installed and set up correctly for running the project.
