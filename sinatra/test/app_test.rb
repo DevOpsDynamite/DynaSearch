@@ -24,4 +24,53 @@
             # Clean up the test database file
             FileUtils.rm_f(@test_db_path)
         end
+
+          # Helper method for registration
+  def register(username, password, password2 = nil, email = nil)
+    password2 ||= password
+    email ||= "#{username}@example.com"
+    post '/api/register', { username: username, email: email, password: password, password2: password2 }
+    follow_redirect!  # to follow the redirect after registration
+    last_response
+  end
+
+    # Helper method for login
+    def login(username, password)
+        post '/api/login', { username: username, password: password }
+        follow_redirect!
+        last_response
+      end
+
+        # Helper method for logout
+  def logout
+    get '/api/logout'
+    follow_redirect!
+    last_response
+  end
+
+  def test_register
+    # First registration should succeed
+    response = register('user1', 'default')
+    assert_includes response.body, 'You were successfully registered and can login now'
+
+    # Trying to register with the same username should fail
+    response = register('user1', 'default')
+    assert_includes response.body, 'The username is already taken'
+
+    # Test missing username
+    response = register('', 'default')
+    assert_includes response.body, 'You have to enter a username'
+
+    # Test missing password
+    response = register('meh', '')
+    assert_includes response.body, 'You have to enter a password'
+
+    # Test non-matching passwords
+    response = register('meh', 'x', 'y')
+    assert_includes response.body, 'The two passwords do not match'
+
+    # Test invalid email
+    response = register('meh', 'foo', nil, 'broken')
+    assert_includes response.body, 'You have to enter a valid email address'
+  end
         end
