@@ -41,13 +41,17 @@ class WhoKnowsTest < Minitest::Test
   end
 
           # Helper method for registration
-  def register(username, password, password2 = nil, email = nil)
-    password2 ||= password
-    email ||= "#{username}@example.com"
-    post '/api/register', { username: username, email: email, password: password, password2: password2 }
-    follow_redirect!  # to follow the redirect after registration
-    last_response
-  end
+          def register(username, password, password2 = nil, email = nil)
+            password2 ||= password
+            email ||= "#{username}@example.com"
+            post '/api/register', { username: username, email: email, password: password, password2: password2 }
+            unless last_response.redirect?
+             # puts "Registration response (#{last_response.status}): #{last_response.body}"
+            end
+            follow_redirect! if last_response.redirect?
+            last_response
+          end
+          
 
     # Helper method for login
     def login(username, password)
