@@ -94,8 +94,14 @@ class WhoKnowsTest < Minitest::Test
   end
 
   def test_login_logout
+    # Register and login the user
     register('user1', 'default')
     response = login('user1', 'default')
     assert_includes response.body, 'You were logged in'
+
+    # Test logout
+    response = logout
+    assert_includes response.body, 'You were logged out'
+
   end
 end
