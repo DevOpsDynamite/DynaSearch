@@ -12,7 +12,7 @@ require 'bcrypt'
 set :bind, '0.0.0.0'
 set :port, 4568
 enable :sessions
-set :session_secret, ENV['SESSION_SECRET'] || 'fallback_secret'
+set :session_secret, ENV['SESSION_SECRET'] || '1b4f8352d8dc6d53a2e1143d42e1ef0bc0e3c2610baadcba4a5b31e74a1b1091'
 
 register Sinatra::Flash
 
@@ -20,27 +20,31 @@ register Sinatra::Flash
 # Database Functions
 ################################################################################
 
-##
 
 DB_PATH = if ENV['RACK_ENV'] == 'test'
-  File.expand_path('test/test_whoknows.db', __dir__)
+  # This will be: <project>/sinatra/test/test_whoknows.db
+  File.join(__dir__, 'test', 'test_whoknows.db')
 else
-  File.expand_path('whoknows.db', __dir__)
+  # Normal DB for dev/prod
+  File.join(__dir__, 'whoknows.db')
 end
 
-
 configure do
-  # Check if DB exists
-  unless File.exist?(DB_PATH)
-    puts "Database not found at #{DB_PATH}"
-    exit(1)
+  if ENV['RACK_ENV'] == 'test'
+    # Don’t exit if the file doesn’t exist—tests will create it.
+    unless File.exist?(DB_PATH)
+      # Create an empty file so SQLite can open it.
+      SQLite3::Database.new(DB_PATH).close
+    end
+  else
+    # Production/Development logic
+    unless File.exist?(DB_PATH)
+      puts "Database not found at #{DB_PATH}"
+      exit(1)
+    end
   end
 
-  # Create a single, shared SQLite connection
   set :db, SQLite3::Database.new(DB_PATH)
-
-  # This line makes SQLite return results as a hash instead of arrays,
-  # so we can do row['column_name'] rather than row[0].
   settings.db.results_as_hash = true
 end
 

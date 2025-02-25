@@ -1,29 +1,44 @@
-    ENV['RACK_ENV'] = 'test'
+ENV['RACK_ENV'] = 'test'
 
-    require 'minitest/autorun'
-    require 'rack/test'
-    require 'fileutils'
-    require_relative '../app'
+require 'minitest/autorun'
+require 'rack/test'
+require 'sqlite3'
+require 'fileutils'
 
-    class WhoKnowsTest < Minitest::Test
-        include Rack::Test::Methods
+
+
+require_relative '../app'
+
+class WhoKnowsTest < Minitest::Test
+  include Rack::Test::Methods
+
+  def app
+    Sinatra::Application
+  end
+
+  def setup
+    @test_db_path = File.join(__dir__, 'test_whoknows.db')
     
-        def app
-        Sinatra::Application
-        end
+    # Ensure the directory exists
+    FileUtils.mkdir_p(File.dirname(@test_db_path))
+    
+    # Remove any old file
+    FileUtils.rm_f(@test_db_path)
+    
+    # Create a fresh DB file and load the schema
+    db = SQLite3::Database.new(@test_db_path)
+    schema_file = File.join(File.dirname(__dir__), 'schema.sql')
+    db.execute_batch(File.read(schema_file)) if File.exist?(schema_file)
+    db.close
+    
+    # Re-open Sinatra's DB connection to point to the new DB file
+    Sinatra::Application.set :db, SQLite3::Database.new(@test_db_path)
+    Sinatra::Application.db.results_as_hash = true
+  end
 
-        def setup
-            # Create a temporary test database file and initialize schema
-            @test_db_path = File.expand_path('test_whoknows.db', File.dirname(__FILE__))
-            FileUtils.rm_f(@test_db_path)
-            FileUtils.cp(File.expand_path('whoknows.db', File.dirname(__FILE__)), @test_db_path) if File.exist?(File.expand_path('whoknows.db', File.dirname(__FILE__)))
-            # Optionally, run your schema migrations here if you have a schema file.
-        end
-
-        def teardown
-            # Clean up the test database file
-            FileUtils.rm_f(@test_db_path)
-        end
+  def teardown
+    FileUtils.rm_f(@test_db_path)
+  end
 
           # Helper method for registration
   def register(username, password, password2 = nil, email = nil)
