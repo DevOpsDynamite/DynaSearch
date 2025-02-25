@@ -20,6 +20,8 @@ register Sinatra::Flash
 # Database Functions
 ################################################################################
 
+##
+
 DB_PATH = if ENV['RACK_ENV'] == 'test'
   File.expand_path('test/test_whoknows.db', __dir__)
 else
