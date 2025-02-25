@@ -20,7 +20,12 @@ register Sinatra::Flash
 # Database Functions
 ################################################################################
 
-DB_PATH = File.expand_path('whoknows.db', __dir__)
+DB_PATH = if ENV['RACK_ENV'] == 'test'
+  File.expand_path('test_whoknows.db', __dir__)
+else
+  File.expand_path('whoknows.db', __dir__)
+end
+
 
 configure do
   # Check if DB exists
