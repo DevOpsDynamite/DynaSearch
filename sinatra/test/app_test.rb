@@ -104,4 +104,9 @@ class WhoKnowsTest < Minitest::Test
     assert_includes response.body, 'You were logged out'
 
   end
+
+  def test_search
+    get '/', { q: 'some search term', language: 'en' }
+    assert last_response.ok?
+  end
 end
