@@ -1,11 +1,11 @@
+# frozen_string_literal: true
+
 ENV['RACK_ENV'] = 'test'
 
 require 'minitest/autorun'
 require 'rack/test'
 require 'sqlite3'
 require 'fileutils'
-
-
 
 require_relative '../app'
 
@@ -18,19 +18,19 @@ class WhoKnowsTest < Minitest::Test
 
   def setup
     @test_db_path = File.join(__dir__, 'test_whoknows.db')
-    
+
     # Ensure the directory exists
     FileUtils.mkdir_p(File.dirname(@test_db_path))
-    
+
     # Remove any old file
     FileUtils.rm_f(@test_db_path)
-    
+
     # Create a fresh DB file and load the schema
     db = SQLite3::Database.new(@test_db_path)
     schema_file = File.join(File.dirname(__dir__), 'schema.sql')
     db.execute_batch(File.read(schema_file)) if File.exist?(schema_file)
     db.close
-    
+
     # Re-open Sinatra's DB connection to point to the new DB file
     Sinatra::Application.set :db, SQLite3::Database.new(@test_db_path)
     Sinatra::Application.db.results_as_hash = true
@@ -40,27 +40,26 @@ class WhoKnowsTest < Minitest::Test
     FileUtils.rm_f(@test_db_path)
   end
 
-     # Helper method for registration
+  # Helper method for registration
   def register(username, password, password2 = nil, email = nil)
-            password2 ||= password
-            email ||= "#{username}@example.com"
-            post '/api/register', { username: username, email: email, password: password, password2: password2 }
-            unless last_response.redirect?
-             # puts "Registration response (#{last_response.status}): #{last_response.body}"
-            end
-            follow_redirect! if last_response.redirect?
-            last_response
-          end
-          
+    password2 ||= password
+    email ||= "#{username}@example.com"
+    post '/api/register', { username: username, email: email, password: password, password2: password2 }
+    unless last_response.redirect?
+      # puts "Registration response (#{last_response.status}): #{last_response.body}"
+    end
+    follow_redirect! if last_response.redirect?
+    last_response
+  end
 
-    # Helper method for login
+  # Helper method for login
   def login(username, password)
     post '/api/login', { username: username, password: password }
     follow_redirect! if last_response.redirect?
     last_response
-    end
+  end
 
-        # Helper method for logout
+  # Helper method for logout
   def logout
     get '/api/logout'
     follow_redirect!
@@ -103,11 +102,9 @@ class WhoKnowsTest < Minitest::Test
     response = logout
     assert_includes response.body, 'You were logged out'
 
-
     # Test login with wrong password
     response = login('user1', 'wrongpassword')
     assert_includes response.body, 'Invalid username or password'
-  
   end
 
   def test_search
