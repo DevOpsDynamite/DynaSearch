@@ -92,4 +92,10 @@ class WhoKnowsTest < Minitest::Test
     response = register('meh', 'foo', nil, 'broken')
     assert_includes response.body, 'You have to enter a valid email address'
   end
-        end
+
+  def test_login_logout
+    register('user1', 'default')
+    response = login('user1', 'default')
+    assert_includes response.body, 'You were logged in'
+  end
+end
