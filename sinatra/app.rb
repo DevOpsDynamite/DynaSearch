@@ -10,9 +10,10 @@ require 'httparty'
 require 'digest'
 require 'bcrypt'
 require 'nokogiri'
+require 'open-uri'
 
 set :bind, '0.0.0.0'
-set :port, 4568
+set :port, 4569
 enable :sessions
 set :session_secret, ENV['SESSION_SECRET'] || 'fallback_secret'
 
@@ -73,25 +74,19 @@ get '/' do
 end
 
 get '/weather' do
-  #URL
-  url = "https://www.dmi.dk/"
-  response = HTTParty.get(url)
-  parsed_page = Nokogiri::HTML(response.body)
-
-  raw_text = parsed_page.css('span.favourite-column-col-data').text.strip rescue nil
-
-  number = raw_text.gsub(/[^\d]/, '') if raw_text
-
-  if number.nil? || number.empty?
-    return "Number not found on page."
-  end
-
-  api_url = "http://localhost:4568/weather"
-  api_response = HTTParty.post(api_url,
-  body: { number: number }.to_json,
-  headers: { 'Content-Type' => 'application/json'})
-
-  "Extracted number: #{number} | API Response: #{api_response.body}"
+  url = "https://quotes.toscrape.com/"
+  
+  # Open the URL using URI.open instead of open
+  html = URI.open(url)
+  
+  # Parse the HTML document with Nokogiri
+  doc = Nokogiri::HTML(html)
+  
+  # Use the XPath to extract the quote
+  quote = doc.xpath('/html/body/div/div[2]/div[1]/div[1]/span[1]').text.strip
+  
+  # Pass the quote to the index.erb template
+  erb :index, locals: { quote: quote }
 end
 
 get '/register' do
