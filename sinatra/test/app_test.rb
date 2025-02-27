@@ -105,6 +105,10 @@ class WhoKnowsTest < Minitest::Test
     # Test login with wrong password
     response = login('user1', 'wrongpassword')
     assert_includes response.body, 'Invalid username or password'
+
+    # Test login with non-existent user
+    response = login('user2', 'wrongpassword')
+    assert_includes response.body, 'Invalid username or password'
   end
 
   
