@@ -6,13 +6,15 @@ require 'sqlite3'
 require 'json'
 require 'sinatra/contrib'
 require 'dotenv/load'
+require 'httparty'
 require 'digest'
 require 'bcrypt'
+require 'nokogiri'
 
 set :bind, '0.0.0.0'
 set :port, 4568
 enable :sessions
-set :session_secret, ENV['SESSION_SECRET'] || '1b4f8352d8dc6d53a2e1143d42e1ef0bc0e3c2610baadcba4a5b31e74a1b1091'
+set :session_secret, ENV['SESSION_SECRET'] || 'fallback_secret'
 
 register Sinatra::Flash
 
@@ -20,31 +22,20 @@ register Sinatra::Flash
 # Database Functions
 ################################################################################
 
-
-DB_PATH = if ENV['RACK_ENV'] == 'test'
-  # This will be: <project>/sinatra/test/test_whoknows.db
-  File.join(__dir__, 'test', 'test_whoknows.db')
-else
-  # Normal DB for dev/prod
-  File.join(__dir__, 'whoknows.db')
-end
+DB_PATH = File.expand_path('whoknows.db', __dir__)
 
 configure do
-  if ENV['RACK_ENV'] == 'test'
-    # Don’t exit if the file doesn’t exist—tests will create it.
-    unless File.exist?(DB_PATH)
-      # Create an empty file so SQLite can open it.
-      SQLite3::Database.new(DB_PATH).close
-    end
-  else
-    # Production/Development logic
-    unless File.exist?(DB_PATH)
-      puts "Database not found at #{DB_PATH}"
-      exit(1)
-    end
+  # Check if DB exists
+  unless File.exist?(DB_PATH)
+    puts "Database not found at #{DB_PATH}"
+    exit(1)
   end
 
+  # Create a single, shared SQLite connection
   set :db, SQLite3::Database.new(DB_PATH)
+
+  # This line makes SQLite return results as a hash instead of arrays,
+  # so we can do row['column_name'] rather than row[0].
   settings.db.results_as_hash = true
 end
 
@@ -82,7 +73,25 @@ get '/' do
 end
 
 get '/weather' do
-  'This is weather page'
+  #URL
+  url = "https://www.dmi.dk/"
+  response = HTTParty.get(url)
+  parsed_page = Nokogiri::HTML(response.body)
+
+  raw_text = parsed_page.css('span.favourite-column-col-data').text.strip rescue nil
+
+  number = raw_text.gsub(/[^\d]/, '') if raw_text
+
+  if number.nil? || number.empty?
+    return "Number not found on page."
+  end
+
+  api_url = "http://localhost:4568/weather"
+  api_response = HTTParty.post(api_url,
+  body: { number: number }.to_json,
+  headers: { 'Content-Type' => 'application/json'})
+
+  "Extracted number: #{number} | API Response: #{api_response.body}"
 end
 
 get '/register' do
