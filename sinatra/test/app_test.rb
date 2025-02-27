@@ -62,7 +62,7 @@ class WhoKnowsTest < Minitest::Test
   # Helper method for logout
   def logout
     get '/api/logout'
-    follow_redirect!
+    follow_redirect! if last_response.redirect?
     last_response
   end
 
@@ -105,7 +105,13 @@ class WhoKnowsTest < Minitest::Test
     # Test login with wrong password
     response = login('user1', 'wrongpassword')
     assert_includes response.body, 'Invalid username or password'
+
+    # Test login with non-existent user
+    response = login('user2', 'wrongpassword')
+    assert_includes response.body, 'Invalid username or password'
   end
+
+  
 
   def test_search
     get '/', { q: 'some search term', language: 'en' }
