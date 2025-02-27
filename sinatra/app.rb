@@ -74,19 +74,23 @@ get '/' do
 end
 
 get '/weather' do
-  url = "https://quotes.toscrape.com/"
+  #Url for site
+  url = "https://www.dmi.dk/"
   
-  # Open the URL using URI.open instead of open
+  # Open the URL using URI.open
   html = URI.open(url)
   
   # Parse the HTML document with Nokogiri
   doc = Nokogiri::HTML(html)
   
-  # Use the XPath to extract the quote
-  quote = doc.xpath('/html/body/div/div[2]/div[1]/div[1]/span[1]').text.strip
-  
+  #Uses XPath to get element
+  element = doc.at_xpath('//*[@id="frontsearch"]/h3')
+
+  #Checks if any data is provided
+  data = element ? element.text.strip : "Data not found"
+
   # Pass the quote to the index.erb template
-  erb :index, locals: { quote: quote }
+  erb :index, locals: { data: data }
 end
 
 get '/register' do
