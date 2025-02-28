@@ -22,7 +22,8 @@ register Sinatra::Flash
 DB_PATH = File.expand_path('../whoknows.db', __FILE__)
 
 configure do
-  # Check if DB exists 
+  # Check if DB exists jdad
+  
   unless File.exist?(DB_PATH)
     puts "Database not found at #{DB_PATH}"
     exit(1)
