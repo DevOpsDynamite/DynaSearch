@@ -28,7 +28,7 @@ configure do
     exit(1)
   end
 
-  # Create a single, shared SQLite connection
+  # Create a single, shared SQLite cadasonnection
   set :db, SQLite3::Database.new(DB_PATH)
 
   # This line makes SQLite return results as a hash instead of arrays,
