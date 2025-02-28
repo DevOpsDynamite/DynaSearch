@@ -187,4 +187,4 @@ end
 
 def verify_password(stored_hash, password)
   BCrypt::Password.new(stored_hash) == password
-end
+end# This is a change in dev
