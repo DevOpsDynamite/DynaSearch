@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'sinatra'
 require 'sinatra/flash'
 require 'sqlite3'
@@ -12,39 +10,29 @@ require 'bcrypt'
 set :bind, '0.0.0.0'
 set :port, 4568
 enable :sessions
-set :session_secret, ENV['SESSION_SECRET'] || '1b4f8352d8dc6d53a2e1143d42e1ef0bc0e3c2610baadcba4a5b31e74a1b1091'
+set :session_secret, ENV['SESSION_SECRET'] || 'fallback_secret'
 
 register Sinatra::Flash
 
-################################################################################
+################################################################################ 
 # Database Functions
 ################################################################################
 
 
-DB_PATH = if ENV['RACK_ENV'] == 'test'
-  # This will be: <project>/sinatra/test/test_whoknows.db
-  File.join(__dir__, 'test', 'test_whoknows.db')
-else
-  # Normal DB for dev/prod
-  File.join(__dir__, 'whoknows.db')
-end
+DB_PATH = File.expand_path('../whoknows.db', __FILE__)
 
 configure do
-  if ENV['RACK_ENV'] == 'test'
-    # Don’t exit if the file doesn’t exist—tests will create it.
-    unless File.exist?(DB_PATH)
-      # Create an empty file so SQLite can open it.
-      SQLite3::Database.new(DB_PATH).close
-    end
-  else
-    # Production/Development logic
-    unless File.exist?(DB_PATH)
-      puts "Database not found at #{DB_PATH}"
-      exit(1)
-    end
+  # Check if DB exists 
+  unless File.exist?(DB_PATH)
+    puts "Database not found at #{DB_PATH}"
+    exit(1)
   end
 
+  # Create a single, shared SQLite connection
   set :db, SQLite3::Database.new(DB_PATH)
+
+  # This line makes SQLite return results as a hash instead of arrays,
+  # so we can do row['column_name'] rather than row[0].
   settings.db.results_as_hash = true
 end
 
@@ -54,11 +42,12 @@ helpers do
   end
 
   def current_user
-    return unless session[:user_id]
-
-    @current_user ||= db.execute('SELECT * FROM users WHERE id = ?', session[:user_id]).first
+    if session[:user_id]
+      @current_user ||= db.execute("SELECT * FROM users WHERE id = ?", session[:user_id]).first
+    end
   end
 end
+
 
 ################################################################################
 # Page Routes
@@ -68,17 +57,21 @@ get '/' do
   q = params[:q]
   language = params[:language] || 'en'
 
-  @search_results = if q.nil? || q.empty?
-                      []
-                    else
-                      db.execute(
-                        'SELECT * FROM pages WHERE language = ? AND content LIKE ?',
-                        [language, "%#{q}%"]
-                      )
-                    end
+  if q.nil? || q.empty?
+    @search_results = []
+  else
+    @search_results = db.execute(
+      "SELECT * FROM pages WHERE language = ? AND content LIKE ?",
+      [language, "%#{q}%"]
+    )
+  end
 
   # Render the ERB template named "search"
-  erb :search
+  erb :search  
+end
+
+get '/about' do
+  erb :about
 end
 
 get '/weather' do
@@ -89,9 +82,10 @@ get '/register' do
   if current_user
     redirect '/'
   else
-    erb :register
+    erb :register  
   end
 end
+
 
 get '/login' do
   if current_user
@@ -101,7 +95,8 @@ get '/login' do
   end
 end
 
-# GET api pages
+
+#GET api pages
 get '/api/search' do
   'Test api search'
 end
@@ -110,23 +105,28 @@ get '/api/weather' do
   'Test api weather'
 end
 
-################################################################################
+
+
+
+
+################################################################################ 
 # POST API pages
-################################################################################
+################################################################################ 
+
 
 post '/api/login' do
   username = params[:username]
   password = params[:password]
 
-  user = db.execute('SELECT * FROM users WHERE username = ?', username).first
+  user = db.execute("SELECT * FROM users WHERE username = ?", username).first
 
   if user.nil?
-    error = 'Invalid username or password'
-  elsif !verify_password(user['password'], password)
-    error = 'Invalid username or password'
+    error = "Invalid username or password"
+  elsif !verify_password(user["password"], password)
+    error = "Invalid username or password"
   else
-    flash[:notice] = 'You were logged in'
-    session[:user_id] = user['id']
+    flash[:notice] = "You were logged in"
+    session[:user_id] = user["id"]
     redirect '/'
   end
 
@@ -135,14 +135,16 @@ post '/api/login' do
 end
 
 get '/api/logout' do
-  flash[:notice] = 'You were logged out'
-  session.clear
+  flash[:notice] = "You were logged out"
+  session.clear 
   redirect '/'
 end
 
 post '/api/register' do
   # If the user is already logged in, redirect to the search page
-  redirect '/' if current_user
+  if current_user
+    redirect '/'
+  end
 
   error = nil
 
@@ -155,7 +157,7 @@ post '/api/register' do
     error = 'You have to enter a password'
   elsif params[:password] != params[:password2]
     error = 'The two passwords do not match'
-  elsif db.execute('SELECT id FROM users WHERE username = ?', params[:username]).first
+  elsif db.execute("SELECT id FROM users WHERE username = ?", params[:username]).first
     error = 'The username is already taken'
   end
 
@@ -165,19 +167,22 @@ post '/api/register' do
   else
     # Hash the password using BCrypt
     hashed_password = hash_password(params[:password])
-
+    
     # Insert the new user into the database
-    db.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-               [params[:username], params[:email], hashed_password])
+    db.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+    [params[:username], params[:email], hashed_password])
 
+    
     flash[:notice] = 'You were successfully registered and can login now'
     redirect '/login'
   end
 end
 
-################################################################################
-# Security functions
-################################################################################
+
+
+################################################################################ 
+#Security functions
+################################################################################ 
 
 def hash_password(password)
   BCrypt::Password.create(password)
