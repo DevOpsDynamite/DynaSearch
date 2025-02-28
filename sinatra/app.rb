@@ -29,6 +29,8 @@ else
   File.join(__dir__, 'whoknows.db')
 end
 
+
+
 configure do
   if ENV['RACK_ENV'] == 'test'
     # Don’t exit if the file doesn’t exist—tests will create it.
