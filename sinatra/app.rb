@@ -46,6 +46,7 @@ configure do
     end
   end
 
+  # Create a single, shared SQLite cadasonnection
   set :db, SQLite3::Database.new(DB_PATH)
   settings.db.results_as_hash = true
 end
@@ -81,6 +82,10 @@ get '/' do
 
   # Render the ERB template named "search"
   erb :search
+end
+
+get '/about' do
+  erb :about
 end
 
 get '/weather' do
