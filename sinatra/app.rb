@@ -84,6 +84,10 @@ get '/' do
   erb :search
 end
 
+get '/about' do
+  erb :about
+end
+
 get '/weather' do
   'This is weather page'
 end
@@ -188,4 +192,4 @@ end
 
 def verify_password(stored_hash, password)
   BCrypt::Password.new(stored_hash) == password
-end# This is a change in dev
+end
