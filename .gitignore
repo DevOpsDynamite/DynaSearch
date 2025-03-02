@@ -193,3 +193,7 @@ Temporary Items
 ### macOS Patch ###
 # iCloud generated files
 *.icloud
+
+### Databases ###
+sinatra/whoknows.db
+whoknows.db
