@@ -1,5 +1,20 @@
 # Deleting the Database from our Public Repository
 
+## Initial considerations
+
+Before starting this exercise, I have researched various ways to solve the problem, that our database shouldn't be pushed to our public GitHub repository.
+
+I found that there a various ways to solve this, all including that the database path should be added to our .gitignore file, to prevent Git from tracking it.
+
+Then I found these various solutions:
+1. Using seeds
+2. Manually copy with SCP
+3. Use a Private Repository
+4. Switching to a managed database service like Azure Database for PostgresSQL or MySQL
+5. Containerization with volumes
+
+As the next part of this course is containerization, we will just go with a simple approach of moving the database to a safe location outside of the repo folder on our production server, and using git -rm cache command to remove it from our gitrepository, and adding it to our .gitignore.
+
 ## Backup your existing data
 
 Before doing anything, make sure that your current database file from your GitHub repository is persisted elsewhere. This shouldn’t be an issue as all group members should have it locally, and for now, it can be found in the commit history.
