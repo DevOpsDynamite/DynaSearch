@@ -89,3 +89,12 @@ For our production server to know where our database is located, simply run:
 
 ```sh
 export DATABASE_PATH="/home/azureuser/path/yourdatabase.db"
+```
+
+or preferrable add it to your .env file by:
+```sh
+nano .env
+```
+
+and then inside your .env file add:
+DATABASE_PATH="/home/azureuser/path/yourdatabase.db"
