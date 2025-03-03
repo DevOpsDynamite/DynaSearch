@@ -22,10 +22,13 @@ register Sinatra::Flash
 
 
 DB_PATH = if ENV['RACK_ENV'] == 'test'
-  # This will be: <project>/sinatra/test/test_whoknows.db
+  # Use a separate test database
   File.join(__dir__, 'test', 'test_whoknows.db')
+elsif ENV['DATABASE_PATH']
+  # Use the path from an environment variable if provided
+  ENV['DATABASE_PATH']
 else
-  # Normal DB for dev/prod
+  # Fallback for development
   File.join(__dir__, 'whoknows.db')
 end
 
