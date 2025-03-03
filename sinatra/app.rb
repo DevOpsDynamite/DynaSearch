@@ -12,7 +12,7 @@ require 'bcrypt'
 set :bind, '0.0.0.0'
 set :port, 4568
 enable :sessions
-set :session_secret, ENV['SESSION_SECRET'] || '1b4f8352d8dc6d53a2e1143d42e1ef0bc0e3c2610baadcba4a5b31e74a1b1091'
+set :session_secret, ENV['SESSION_SECRET'] || 'fallback_secret'
 
 register Sinatra::Flash
 
