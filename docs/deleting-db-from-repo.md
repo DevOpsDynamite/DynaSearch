@@ -13,6 +13,8 @@ Then I found these various solutions:
 4. Switching to a managed database service like Azure Database for PostgresSQL or MySQL
 5. Containerization with volumes
 
+If this was a true production server in a company, it would be a really good idea to upgrade from SQLLite to a managed database service. As this is a part of the curriculum of the course in one of the lectures in the future, we will leave it to be SQLLite from now on.
+
 As the next part of this course is containerization, we will just go with a simple approach of moving the database to a safe location outside of the repo folder on our production server, and using git -rm cache command to remove it from our gitrepository, and adding it to our .gitignore.
 
 ## Backup your existing data
