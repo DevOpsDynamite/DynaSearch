@@ -17,6 +17,11 @@ If this was a true production server in a company, it would be a really good ide
 
 As the next part of this course is containerization, we will just go with a simple approach of moving the database to a safe location outside of the repo folder on our production server, and using git -rm cache command to remove it from our gitrepository, and adding it to our .gitignore.
 
+Currently we are using this command before running our application on the server:
+export DATABASE_PATH="/home/azureuser/path/yourdatabase.db"
+
+This has to be done manually everytime closing the Puma Sinatra server. We will look into ways of automating this, as that would make better sense. 
+
 ## Backup your existing data
 
 Before doing anything, make sure that your current database file from your GitHub repository is persisted elsewhere. This shouldn’t be an issue as all group members should have it locally, and for now, it can be found in the commit history.
