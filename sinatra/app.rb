@@ -35,22 +35,18 @@ end
 
 
 configure do
-  if ENV['RACK_ENV'] == 'test'
-    # Don’t exit if the file doesn’t exist—tests will create it.
-    unless File.exist?(DB_PATH)
-      # Create an empty file so SQLite can open it.
-      SQLite3::Database.new(DB_PATH).close
-    end
-  else
-    # Production/Development logic
-    unless File.exist?(DB_PATH)
-      puts "Database not found at #{DB_PATH}"
-      exit(1)
-    end
+  # Check if DB exists
+  unless File.exist?(DB_PATH)
+    puts "Database not found at #{DB_PATH}"
+    exit(1)
   end
 
-  # Create a single, shared SQLite cadasonnection
+
+  # Create a single, shared SQLite connection
   set :db, SQLite3::Database.new(DB_PATH)
+
+  # This line makes SQLite return results as a hash instead of arrays,
+  # so we can do row['column_name'] rather than row[0].
   settings.db.results_as_hash = true
 end
 
