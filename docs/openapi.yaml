@@ -1,0 +1,257 @@
+openapi: 3.1.0
+info:
+  title: WhoKnows
+  version: "0.1.0"
+paths:
+  /:
+    get:
+      summary: Serve Root Page
+      operationId: serve_root_page__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+  /about:
+    get:
+      summary: Serve About Page
+      operationId: serve_about_page_about_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+  /login:
+    get:
+      summary: Serve Login Page
+      operationId: serve_login_page_login_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+  /register:
+    get:
+      summary: Serve Register Page
+      operationId: serve_register_page_register_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+  /api/search:
+    get:
+      summary: Search
+      operationId: search_api_search_get
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Q
+        - name: language
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            title: Language
+            description: Language code (e.g., 'en')
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestValidationError'
+  /api/login:
+    post:
+      summary: Login
+      operationId: login_api_login_post
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_login_api_login_post'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/register:
+    post:
+      summary: Register
+      operationId: register_api_register_post
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_register_api_register_post'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/logout:
+    get:
+      summary: Logout
+      operationId: logout_api_logout_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+components:
+  schemas:
+    AuthResponse:
+      type: object
+      title: AuthResponse
+      properties:
+        statusCode:
+          anyOf:
+            - type: integer
+            - type: "null"
+          title: Statuscode
+          description: HTTP status code
+        message:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Message
+          description: Response message
+    Body_login_api_login_post:
+      type: object
+      title: Body_login_api_login_post
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+    Body_register_api_register_post:
+      type: object
+      title: Body_register_api_register_post
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          title: Username
+        email:
+          type: string
+          title: Email
+        password:
+          type: string
+          title: Password
+        password2:
+          type: string
+          title: Password2
+    HTTPValidationError:
+      type: object
+      title: HTTPValidationError
+      properties:
+        detail:
+          type: array
+          title: Detail
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    RequestValidationError:
+      type: object
+      title: RequestValidationError
+      properties:
+        statusCode:
+          type: integer
+          title: Statuscode
+          description: HTTP status code. Defaulting to HTTP 422 Unprocessable Entity.
+          default: 422
+        message:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Message
+          description: Detail of the validation error
+    SearchResponse:
+      type: object
+      title: SearchResponse
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          title: Data
+          description: List of data dictionaries with mixed types.
+          items:
+            type: object
+    StandardResponse:
+      type: object
+      title: StandardResponse
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          title: Data
+          description: Dictionary with mixed types.
+    ValidationError:
+      type: object
+      title: ValidationError
+      required:
+        - loc
+        - msg
+        - type
+      properties:
+        loc:
+          type: array
+          title: Location
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
