@@ -12,7 +12,7 @@ require 'bcrypt'
 set :bind, '0.0.0.0'
 set :port, 4568
 enable :sessions
-set :session_secret, ENV['SESSION_SECRET'] || 'fallback_secret'
+set :session_secret, ENV['SESSION_SECRET'] || '1b4f8352d8dc6d53a2e1143d42e1ef0bc0e3c2610baadcba4a5b31e74a1b1091'
 
 register Sinatra::Flash
 
@@ -22,13 +22,10 @@ register Sinatra::Flash
 
 
 DB_PATH = if ENV['RACK_ENV'] == 'test'
-  # Use a separate test database
+  # This will be: <project>/sinatra/test/test_whoknows.db
   File.join(__dir__, 'test', 'test_whoknows.db')
-elsif ENV['DATABASE_PATH']
-  # Use the path from an environment variable if provided
-  ENV['DATABASE_PATH']
 else
-  # Fallback for development
+  # Normal DB for dev/prod
   File.join(__dir__, 'whoknows.db')
 end
 
