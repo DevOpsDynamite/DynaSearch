@@ -20,7 +20,19 @@ register Sinatra::Flash
 # Database Functions
 ################################################################################
 
-DB_PATH = File.expand_path('whoknows.db', __dir__)
+
+DB_PATH = if ENV['RACK_ENV'] == 'test'
+  # Use a separate test database
+  File.join(__dir__, 'test', 'test_whoknows.db')
+elsif ENV['DATABASE_PATH']
+  # Use the path from an environment variable if provided
+  ENV['DATABASE_PATH']
+else
+  # Fallback for development
+  File.join(__dir__, 'whoknows.db')
+end
+
+
 
 configure do
   # Check if DB exists
@@ -28,6 +40,7 @@ configure do
     puts "Database not found at #{DB_PATH}"
     exit(1)
   end
+
 
   # Create a single, shared SQLite connection
   set :db, SQLite3::Database.new(DB_PATH)
@@ -68,6 +81,10 @@ get '/' do
 
   # Render the ERB template named "search"
   erb :search
+end
+
+get '/about' do
+  erb :about
 end
 
 get '/weather' do
