@@ -50,7 +50,21 @@ helpers do
 
     @current_user ||= db.execute('SELECT * FROM users WHERE id = ?', session[:user_id]).first
   end
+
+  def fetch_forecast
+    api_url = "https://dmigw.govcloud.dk/v1/forecastdata/collections/dkss_idw"
+    api_key = ENV['FORECAST_API_KEY']
+  
+    response = HTTParty.get(api_url, headers: { 'X-Gravitee-Api-Key' => api_key })
+  
+    if response.code == 200
+      return JSON.parse(response.body)
+    else
+      return { "error" => "Failed to retrieve data. API response code: #{response.code}" }
+    end
+  end
 end
+
 
 ################################################################################
 # Page Routes
@@ -74,24 +88,10 @@ get '/' do
 end
 
 get '/weather' do
-  #Url for site
-  url = "https://www.dmi.dk/"
-  
-  # Open the URL using URI.open
-  html = URI.open(url)
-  
-  # Parse the HTML document with Nokogiri
-  doc = Nokogiri::HTML(html)
-  
-  #Uses XPath to get element
-  element = doc.at_xpath('//*[@id="frontsearch"]/h3')
-
-  #Checks if any data is provided
-  data = element ? element.text.strip : "Data not found"
-
-  # Pass the quote to the index.erb template
-  erb :index, locals: { data: data }
+  @forecast_data = fetch_forecast
+  erb :weather
 end
+  
 
 get '/register' do
   if current_user
