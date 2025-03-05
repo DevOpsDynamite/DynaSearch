@@ -194,5 +194,6 @@ Temporary Items
 # iCloud generated files
 *.icloud
 
-### Databases ###
+## database path ##
+
 sinatra/whoknows.db
