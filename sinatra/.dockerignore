@@ -1,2 +1,7 @@
-whoknows.db
-.env
+.git
+.github
+.vscode
+test/
+docs/
+*.db
+*.env
