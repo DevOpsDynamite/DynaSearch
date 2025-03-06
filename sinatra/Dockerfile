@@ -9,3 +9,12 @@ WORKDIR /app
 # Copy Gemfiles and install dependencies
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
+
+# Copy application code (except sensitive files)
+COPY . .
+
+# Expose Sinatra port
+EXPOSE 4568
+
+# Run the Sinatra app directly
+CMD ["ruby", "app.rb"]
