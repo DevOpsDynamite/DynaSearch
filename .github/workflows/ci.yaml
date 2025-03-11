@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - feature-CI-workflow
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.2  
+          bundler-cache: true
+
+      - name: Install dependencies
+        working-directory: sinatra  # Ensure we're inside the sinatra folder
+        run: bundle install
+
+      - name: Setup test database
+        working-directory: sinatra  # Ensure DB setup runs in the correct directory
+        run: |
+          touch test/test_whoknows.db  # Ensure test DB file exists
+          sqlite3 test/test_whoknows.db < schema.sql  # Load schema
+
+      - name: Run Minitest
+        working-directory: sinatra  # Run tests from the correct directory
+        env:
+          RACK_ENV: test  # Ensure the app runs in test mode
+        run: bundle exec ruby -Itest test/app_test.rb
+
+      - name: Auto-correct RuboCop issues
+        working-directory: sinatra
+        run: bundle exec rubocop -A || true  # Ensure CI doesn't fail on auto-fixes
+
+      - name: Run RuboCop (Code Linter)
+        working-directory: sinatra
+        run: bundle exec rubocop || true  # Allow non-critical failures
