@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - feature-CI-workflow
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2  # Match your Ruby version
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Setup test database
+        run: |
+          touch test/test_whoknows.db  # Ensure test DB file exists
+          sqlite3 test/test_whoknows.db < schema.sql  # Load schema
+
+      - name: Run Minitest
+        env:
+          RACK_ENV: test  # Ensure the app runs in test mode
+        run: bundle exec ruby -Itest test/app_test.rb
+
+      - name: Run RuboCop (Code Linter)
+        run: bundle exec rubocop
