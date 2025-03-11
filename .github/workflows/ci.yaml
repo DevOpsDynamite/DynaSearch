@@ -26,17 +26,21 @@ jobs:
           bundler-cache: true
 
       - name: Install dependencies
+        working-directory: sinatra  # Now it correctly runs in the sinatra folder
         run: bundle install
 
       - name: Setup test database
+        working-directory: sinatra  # Ensure all DB commands run in the right place
         run: |
           touch test/test_whoknows.db  # Ensure test DB file exists
           sqlite3 test/test_whoknows.db < schema.sql  # Load schema
 
       - name: Run Minitest
+        working-directory: sinatra  # Make sure tests run inside the sinatra folder
         env:
           RACK_ENV: test  # Ensure the app runs in test mode
         run: bundle exec ruby -Itest test/app_test.rb
 
       - name: Run RuboCop (Code Linter)
+        working-directory: sinatra  # Ensure linting runs inside sinatra folder
         run: bundle exec rubocop
