@@ -9,9 +9,7 @@ require 'fileutils'
 require 'dotenv'
 Dotenv.load
 
-
 puts "SESSION_SECRET: #{ENV['SESSION_SECRET']}"
-
 
 require_relative '../app'
 
@@ -116,8 +114,6 @@ class WhoKnowsTest < Minitest::Test
     response = login('user2', 'wrongpassword')
     assert_includes response.body, 'Invalid username or password'
   end
-
-  
 
   def test_search
     get '/', { q: 'some search term', language: 'en' }
