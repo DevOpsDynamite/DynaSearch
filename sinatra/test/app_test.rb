@@ -6,6 +6,12 @@ require 'minitest/autorun'
 require 'rack/test'
 require 'sqlite3'
 require 'fileutils'
+require 'dotenv'
+Dotenv.load
+
+
+puts "SESSION_SECRET: #{ENV['SESSION_SECRET']}"
+
 
 require_relative '../app'
 
