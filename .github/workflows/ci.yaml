@@ -1,11 +1,10 @@
 name: CI
 
 on:
-  push:
+  pull_request:
     branches:
       - main
       - dev
-      - feature-CI-workflow
   workflow_dispatch:  # Allows manual triggering from GitHub UI
 
 jobs:
