@@ -1,5 +1,5 @@
 # Choosing a Git Branching Strategy
-![Image of branching strategy](/images/gitlab_flow.png)
+![Image of branching strategy](./images/image-243-2.png)
 
 Initially, we considered GitFlow and GitLab Workflow for our project's branching strategy. GitHub Flow was dismissed due to its lack of a dedicated developer branch, which we needed to clearly separate testing and production environments.
 
