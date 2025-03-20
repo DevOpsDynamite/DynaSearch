@@ -36,4 +36,3 @@ body:
       label: "Actual Behavior"
       description: "Describe what actually happened."
       placeholder: "The application crashes and shows an error message."
-  - type: input
