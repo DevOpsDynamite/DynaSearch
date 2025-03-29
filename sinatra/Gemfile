@@ -12,8 +12,6 @@ gem 'sinatra-flash'
 gem 'sqlite3'
 gem 'httparty'
 gem 'nokogiri'
-gem 'open-uri'
-
 gem 'rubocop', '~> 1.72', require: false
 
 group :test do
