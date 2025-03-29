@@ -15,7 +15,7 @@ require 'open-uri'
 set :bind, '0.0.0.0'
 set :port, 4569
 enable :sessions
-set :session_secret, ENV['SESSION_SECRET'] || 'fallback_secret'
+set :session_secret, ENV['SESSION_SECRET'] || SecureRandom.hex(32)
 
 register Sinatra::Flash
 
@@ -23,7 +23,19 @@ register Sinatra::Flash
 # Database Functions
 ################################################################################
 
-DB_PATH = File.expand_path('whoknows.db', __dir__)
+
+DB_PATH = if ENV['RACK_ENV'] == 'test'
+  # Use a separate test database
+  File.join(__dir__, 'test', 'test_whoknows.db')
+elsif ENV['DATABASE_PATH']
+  # Use the path from an environment variable if provided
+  ENV['DATABASE_PATH']
+else
+  # Fallback for development
+  File.join(__dir__, 'whoknows.db')
+end
+
+
 
 configure do
   # Check if DB exists
@@ -32,7 +44,7 @@ configure do
     exit(1)
   end
 
-  # Create a single, shared SQLite connection
+  # Create a single, shared SQLite cadasonnection
   set :db, SQLite3::Database.new(DB_PATH)
 
   # This line makes SQLite return results as a hash instead of arrays,
@@ -87,6 +99,10 @@ get '/' do
   erb :search
 end
 
+get '/about' do
+  erb :about
+end
+
 get '/weather' do
   @forecast_data = fetch_forecast
   erb :weather
@@ -116,6 +132,15 @@ end
 
 get '/api/weather' do
   'Test api weather'
+end
+
+################################################################################
+# NOT FOUND pages
+################################################################################
+
+not_found do
+  status 404
+  erb :not_found
 end
 
 ################################################################################

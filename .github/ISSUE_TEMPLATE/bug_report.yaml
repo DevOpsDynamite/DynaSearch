@@ -1,0 +1,38 @@
+name: "Bug Report"
+description: "Report a bug to help us improve the project."
+title: "[BUG] "
+labels: ["bug"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug. Please provide as much detail as possible below so we can address the issue.
+  - type: input
+    id: summary
+    attributes:
+      label: "Bug Summary"
+      description: "A brief description of the bug."
+      placeholder: "e.g. Crash on clicking the Save button"
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: "Steps to Reproduce"
+      description: "List the steps required to reproduce the bug."
+      placeholder: |
+        1. Open the application.
+        2. Navigate to the Save button.
+        3. Click the Save button.
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "Expected Behavior"
+      description: "Describe what you expected to happen."
+      placeholder: "The application should save the data and display a confirmation message."
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: "Actual Behavior"
+      description: "Describe what actually happened."
+      placeholder: "The application crashes and shows an error message."
