@@ -3,10 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quote Scraper</title>
+  <title>Weather Forecast for <%= @forecast_data["city_name"] %></title>
 </head>
 <body>
-  <h1>Scraped Data:</h1>
-  <p><%= @forecast_data %></p>
+  <h1>7-Day Weather Forecast for <%= @forecast_data["city_name"] %></h1>
+
+  <% if @forecast_data["error"] %>
+    <p>Error: <%= @forecast_data["error"] %></p>
+  <% elsif @forecast_data["data"] %>
+    <ul>
+      <% @forecast_data["data"].each do |day| %>
+        <li>
+          Date: <%= day["datetime"] %> | 
+          High: <%= day["max_temp"] %>°C | 
+          Low: <%= day["min_temp"] %>°C | 
+          Weather: <%= day["weather"]["description"] %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No forecast data available.</p>
+  <% end %>
 </body>
 </html>

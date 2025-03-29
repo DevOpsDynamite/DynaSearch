@@ -11,6 +11,8 @@ require 'digest'
 require 'bcrypt'
 require 'nokogiri'
 require 'open-uri'
+require 'httparty'
+
 
 set :bind, '0.0.0.0'
 set :port, 4568
@@ -63,18 +65,23 @@ helpers do
     @current_user ||= db.execute('SELECT * FROM users WHERE id = ?', session[:user_id]).first
   end
 
-  def fetch_forecast
-    api_url = "https://dmigw.govcloud.dk/v1/forecastdata/collections/dkss_idw"
-    api_key = ENV['FORECAST_API_KEY']
+  # Initialize cache variables (could be done in configure)
+set :forecast_cache, nil
+set :forecast_cache_expiration, Time.now
+
+def fetch_forecast
+  api_key = ENV['WEATHERBIT_API_KEY']
+  city = 'Copenhagen' # Change to your desired city
+  api_url = "https://api.weatherbit.io/v2.0/forecast/daily?city=#{city}&key=#{api_key}&days=7"
   
-    response = HTTParty.get(api_url, headers: { 'X-Gravitee-Api-Key' => api_key })
+  response = HTTParty.get(api_url)
   
-    if response.code == 200
-      return JSON.parse(response.body)
-    else
-      return { "error" => "Failed to retrieve data. API response code: #{response.code}" }
-    end
+  if response.code == 200
+    JSON.parse(response.body)
+  else
+    { "error" => "Failed to retrieve data. API response code: #{response.code}" }
   end
+end
 end
 
 
