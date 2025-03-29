@@ -82,6 +82,14 @@ def fetch_forecast
 end
 end
 
+def get_cached_forecast
+  if settings.forecast_cache.nil? || settings.forecast_cache_expiration < Time.now
+    settings.forecast_cache = fetch_forecast
+    settings.forecast_cache_expiration = Time.now + 3600
+  end
+  settings.forecast_cache
+end
+
 
 ################################################################################
 # Page Routes
@@ -109,7 +117,7 @@ get '/about' do
 end
 
 get '/weather' do
-  @forecast_data = fetch_forecast
+  @forecast_data = get_cached_forecast
   erb :weather
 end
   
