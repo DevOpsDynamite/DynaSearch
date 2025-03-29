@@ -13,7 +13,7 @@ require 'nokogiri'
 require 'open-uri'
 
 set :bind, '0.0.0.0'
-set :port, 4569
+set :port, 4568
 enable :sessions
 set :session_secret, ENV['SESSION_SECRET'] || SecureRandom.hex(32)
 
