@@ -11,8 +11,6 @@ require 'digest'
 require 'bcrypt'
 require 'nokogiri'
 require 'open-uri'
-require 'httparty'
-
 
 set :bind, '0.0.0.0'
 set :port, 4568
