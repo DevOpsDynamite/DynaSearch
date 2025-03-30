@@ -82,6 +82,8 @@ def fetch_forecast
 end
 end
 
+#Caching so our weather-forecast only gets updated once an hour, to limit API calls. 3600 secs = 1 hour
+
 def get_cached_forecast
   if settings.forecast_cache.nil? || settings.forecast_cache_expiration < Time.now
     settings.forecast_cache = fetch_forecast
