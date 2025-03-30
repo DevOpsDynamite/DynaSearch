@@ -2,7 +2,7 @@ name: Continuous Delivery
 
 on:
   push:
-    branches: [ "main", "dev", "feature/continuous_delivery" ]  # Trigger on pushes to main branch
+    branches: [ "main", "dev" ]  # Trigger on pushes to main branch
 
 jobs:
   build-and-push:
