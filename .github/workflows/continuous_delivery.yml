@@ -29,8 +29,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: .
-          file: sinatra/Dockerfile.prod          # use the production Dockerfile
+          context: sinatra
+          file: Dockerfile.prod          # use the production Dockerfile
           push: true
           tags: |
             ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:latest
