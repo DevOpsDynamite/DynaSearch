@@ -30,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: sinatra
-          file: Dockerfile.prod          # use the production Dockerfile
+          file: sinatra/Dockerfile.prod          # use the production Dockerfile
           push: true
           tags: |
             ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:latest
