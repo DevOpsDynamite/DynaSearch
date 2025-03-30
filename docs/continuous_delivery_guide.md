@@ -231,6 +231,7 @@ docker-prod-build:
 # Run tests inside the development container (if you have a test suite)
 docker-test:
 	docker compose -f docker-compose.dev.yml run --rm app bundle exec rspec
+    ```
 
 
 
