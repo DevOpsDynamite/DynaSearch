@@ -22,31 +22,25 @@ register Sinatra::Flash
 ################################################################################
 # Database Functions
 ################################################################################
-
 DB_PATH = if ENV['RACK_ENV'] == 'test'
-            # Use a separate test database
-            File.join(__dir__, 'test', 'test_whoknows.db')
-          elsif ENV['DATABASE_PATH']
-            # Use the path from an environment variable if provided
-            ENV['DATABASE_PATH']
-          else
-            # Fallback for development
-            File.join(__dir__, 'whoknows.db')
-          end
+  File.join(__dir__, 'test', 'test_whoknows.db')
+elsif ENV['DATABASE_PATH']
+  ENV['DATABASE_PATH']
+else
+  File.join(__dir__, 'whoknows.db')
+end
 
 configure do
-  # Check if DB exists
-  unless File.exist?(DB_PATH)
-    puts "Database not found at #{DB_PATH}"
-    exit(1)
-  end
+# Only check for the database file if not in test mode
+if ENV['RACK_ENV'] != 'test'
+unless File.exist?(DB_PATH)
+puts "Database not found at #{DB_PATH}"
+exit(1)
+end
+end
 
-  # Create a single, shared SQLite cadasonnection
-  set :db, SQLite3::Database.new(DB_PATH)
-
-  # This line makes SQLite return results as a hash instead of arrays,
-  # so we can do row['column_name'] rather than row[0].
-  settings.db.results_as_hash = true
+set :db, SQLite3::Database.new(DB_PATH)
+settings.db.results_as_hash = true
 end
 
 helpers do
