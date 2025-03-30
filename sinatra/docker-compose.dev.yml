@@ -1,0 +1,14 @@
+version: '3'
+services:
+  app:
+    build:
+      context: . 
+      dockerfile: Dockerfile.dev       # use the development Dockerfile
+    ports:
+      - "4568:4568"                    # map Sinatra port to host
+    volumes:
+      - .:/app                         # mount current directory to container for code reload
+    env_file:
+      - .env               # load dev-specific environment variables
+    environment:
+      - RACK_ENV=development           # ensure Sinatra runs in development mode
