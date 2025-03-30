@@ -23,19 +23,16 @@ register Sinatra::Flash
 # Database Functions
 ################################################################################
 
-
 DB_PATH = if ENV['RACK_ENV'] == 'test'
-  # Use a separate test database
-  File.join(__dir__, 'test', 'test_whoknows.db')
-elsif ENV['DATABASE_PATH']
-  # Use the path from an environment variable if provided
-  ENV['DATABASE_PATH']
-else
-  # Fallback for development
-  File.join(__dir__, 'whoknows.db')
-end
-
-
+            # Use a separate test database
+            File.join(__dir__, 'test', 'test_whoknows.db')
+          elsif ENV['DATABASE_PATH']
+            # Use the path from an environment variable if provided
+            ENV['DATABASE_PATH']
+          else
+            # Fallback for development
+            File.join(__dir__, 'whoknows.db')
+          end
 
 configure do
   # Check if DB exists
@@ -64,25 +61,25 @@ helpers do
   end
 
   # Initialize cache variables (could be done in configure)
-set :forecast_cache, nil
-set :forecast_cache_expiration, Time.now
+  set :forecast_cache, nil
+  set :forecast_cache_expiration, Time.now
 
-def fetch_forecast
-  api_key = ENV['WEATHERBIT_API_KEY']
-  city = 'Copenhagen' # Change to your desired city
-  api_url = "https://api.weatherbit.io/v2.0/forecast/daily?city=#{city}&key=#{api_key}&days=7"
-  
-  response = HTTParty.get(api_url)
-  
-  if response.code == 200
-    JSON.parse(response.body)
-  else
-    { "error" => "Failed to retrieve data. API response code: #{response.code}" }
+  def fetch_forecast
+    api_key = ENV['WEATHERBIT_API_KEY']
+    city = 'Copenhagen' # Change to your desired city
+    api_url = "https://api.weatherbit.io/v2.0/forecast/daily?city=#{city}&key=#{api_key}&days=7"
+
+    response = HTTParty.get(api_url)
+
+    if response.code == 200
+      JSON.parse(response.body)
+    else
+      { 'error' => "Failed to retrieve data. API response code: #{response.code}" }
+    end
   end
 end
-end
 
-#Caching so our weather-forecast only gets updated once an hour, to limit API calls. 3600 secs = 1 hour
+# Caching so our weather-forecast only gets updated once an hour, to limit API calls. 3600 secs = 1 hour
 
 def get_cached_forecast
   if settings.forecast_cache.nil? || settings.forecast_cache_expiration < Time.now
@@ -91,7 +88,6 @@ def get_cached_forecast
   end
   settings.forecast_cache
 end
-
 
 ################################################################################
 # Page Routes
@@ -122,7 +118,6 @@ get '/weather' do
   @forecast_data = get_cached_forecast
   erb :weather
 end
-  
 
 get '/register' do
   if current_user

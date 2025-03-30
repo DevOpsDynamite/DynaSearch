@@ -4,17 +4,17 @@ source 'https://rubygems.org'
 
 gem 'bcrypt', '~> 3.1.13'
 gem 'dotenv'
+gem 'httparty'
+gem 'nokogiri'
 gem 'puma', '~> 6.6'
 gem 'rackup', '~> 2.2'
+gem 'rubocop', '~> 1.72', require: false
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'sinatra-flash'
 gem 'sqlite3'
-gem 'httparty'
-gem 'nokogiri'
-gem 'rubocop', '~> 1.72', require: false
 
 group :test do
-    gem 'minitest'
-    gem 'rack-test'
-  end
+  gem 'minitest'
+  gem 'rack-test'
+end
