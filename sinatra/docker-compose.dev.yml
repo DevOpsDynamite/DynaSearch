@@ -3,12 +3,14 @@ services:
   app:
     build:
       context: . 
-      dockerfile: Dockerfile.dev       # use the development Dockerfile
+      dockerfile: Dockerfile.dev   # use the development 
     ports:
-      - "4568:4568"                    # map Sinatra port to host
+      - "4568:4568"                # map Sinatra port to host
     volumes:
-      - .:/app                         # mount current directory to container for code reload
+      - .:/app                     # mount current directory to container 
     env_file:
-      - .env               # load dev-specific environment variables
+      - .env                       # load dev-specific environment variables
     environment:
-      - RACK_ENV=development           # ensure Sinatra runs in development mode
+      - RACK_ENV=development       # ensure Sinatra runs in development mode
+    stdin_open: true
+    tty: true
