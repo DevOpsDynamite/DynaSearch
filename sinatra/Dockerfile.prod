@@ -1,0 +1,36 @@
+# Stage 1: Builder – install gems and assets
+FROM ruby:3.2-slim AS builder
+
+# Install build tools and dependencies for building gems
+RUN apt-get update -qq && apt-get install -y build-essential libsqlite3-dev
+
+WORKDIR /app
+
+# Install app gems (without dev and test groups for a leaner production image)
+COPY Gemfile Gemfile.lock ./
+RUN gem install bundler && bundle install --without development test
+
+# Copy application source code
+COPY . .
+
+# Stage 2: Final image – only includes runtime necessities
+FROM ruby:3.2-slim
+
+# Install runtime dependencies (no build tools)
+RUN apt-get update -qq && apt-get install -y libsqlite3-0 && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy app code and gem bundles from builder stage
+COPY --from=builder /app . 
+COPY --from=builder /usr/local/bundle /usr/local/bundle
+
+# Set environment to production
+ENV RACK_ENV=production
+
+# Expose port
+EXPOSE 4568
+
+# Use an appropriate command to run the Sinatra app in production
+# (Use exec form to ensure the process receives signals properly)
+CMD ["bundle", "exec", "ruby", "app.rb", "-o", "0.0.0.0", "-p", "4568"]

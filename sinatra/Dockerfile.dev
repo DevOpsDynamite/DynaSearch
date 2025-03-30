@@ -1,0 +1,27 @@
+# Use an official lightweight Ruby image for development
+FROM ruby:3.2-slim
+
+# Install build tools and SQLite library (needed to install the sqlite3 gem)
+RUN apt-get update -qq && apt-get install -y build-essential libsqlite3-dev
+
+# Set working directory
+WORKDIR /app
+
+# Install app dependencies (Gemfile should list all gems)
+COPY Gemfile Gemfile.lock ./
+RUN gem install bundler && bundle install
+
+# Install 'rerun' for auto-reloading in development
+RUN gem install rerun
+
+# Copy the application code
+COPY . .
+
+# Expose Sinatra's default port
+EXPOSE 4568
+
+# Set environment to development by default
+ENV RACK_ENV=development
+
+# Command: use rerun to restart the app on code changes
+CMD ["rerun", "--", "ruby", "app.rb", "-o", "0.0.0.0"]
