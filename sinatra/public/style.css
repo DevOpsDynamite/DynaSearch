@@ -72,6 +72,9 @@ html, body {
   #nav-login, #nav-register, #nav-logout {
     float: right;
   }
+  #nav-weather {
+    float: left;
+  }
   
   /* Input styling */
   input {
