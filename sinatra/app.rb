@@ -6,8 +6,11 @@ require 'sqlite3'
 require 'json'
 require 'sinatra/contrib'
 require 'dotenv/load'
+require 'httparty'
 require 'digest'
 require 'bcrypt'
+require 'nokogiri'
+require 'open-uri'
 
 set :bind, '0.0.0.0'
 set :port, 4568
@@ -19,39 +22,25 @@ register Sinatra::Flash
 ################################################################################
 # Database Functions
 ################################################################################
-
-
 DB_PATH = if ENV['RACK_ENV'] == 'test'
-  # Use a separate test database
   File.join(__dir__, 'test', 'test_whoknows.db')
 elsif ENV['DATABASE_PATH']
-  # Use the path from an environment variable if provided
   ENV['DATABASE_PATH']
 else
-  # Fallback for development
   File.join(__dir__, 'whoknows.db')
 end
 
-
-
 configure do
-  if ENV['RACK_ENV'] == 'test'
-    # Don’t exit if the file doesn’t exist—tests will create it.
-    unless File.exist?(DB_PATH)
-      # Create an empty file so SQLite can open it.
-      SQLite3::Database.new(DB_PATH).close
-    end
-  else
-    # Production/Development logic
-    unless File.exist?(DB_PATH)
-      puts "Database not found at #{DB_PATH}"
-      exit(1)
-    end
-  end
+# Only check for the database file if not in test mode
+if ENV['RACK_ENV'] != 'test'
+unless File.exist?(DB_PATH)
+puts "Database not found at #{DB_PATH}"
+exit(1)
+end
+end
 
-  # Create a single, shared SQLite cadasonnection
-  set :db, SQLite3::Database.new(DB_PATH)
-  settings.db.results_as_hash = true
+set :db, SQLite3::Database.new(DB_PATH)
+settings.db.results_as_hash = true
 end
 
 helpers do
@@ -64,6 +53,34 @@ helpers do
 
     @current_user ||= db.execute('SELECT * FROM users WHERE id = ?', session[:user_id]).first
   end
+
+  # Initialize cache variables (could be done in configure)
+  set :forecast_cache, nil
+  set :forecast_cache_expiration, Time.now
+
+  def fetch_forecast
+    api_key = ENV['WEATHERBIT_API_KEY']
+    city = 'Copenhagen' # Change to your desired city
+    api_url = "https://api.weatherbit.io/v2.0/forecast/daily?city=#{city}&key=#{api_key}&days=7"
+
+    response = HTTParty.get(api_url)
+
+    if response.code == 200
+      JSON.parse(response.body)
+    else
+      { 'error' => "Failed to retrieve data. API response code: #{response.code}" }
+    end
+  end
+end
+
+# Caching so our weather-forecast only gets updated once an hour, to limit API calls. 3600 secs = 1 hour
+
+def get_cached_forecast
+  if settings.forecast_cache.nil? || settings.forecast_cache_expiration < Time.now
+    settings.forecast_cache = fetch_forecast
+    settings.forecast_cache_expiration = Time.now + 3600
+  end
+  settings.forecast_cache
 end
 
 ################################################################################
@@ -92,7 +109,8 @@ get '/about' do
 end
 
 get '/weather' do
-  'This is weather page'
+  @forecast_data = get_cached_forecast
+  erb :weather
 end
 
 get '/register' do
@@ -118,6 +136,15 @@ end
 
 get '/api/weather' do
   'Test api weather'
+end
+
+################################################################################
+# NOT FOUND pages
+################################################################################
+
+not_found do
+  status 404
+  erb :not_found
 end
 
 ################################################################################
