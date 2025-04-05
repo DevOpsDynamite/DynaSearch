@@ -1,27 +1,50 @@
-# Use an official lightweight Ruby image for development
-FROM ruby:3.2-slim
+# Stage 1: Builder – install gems and assets
+FROM ruby:3.2-slim AS builder
 
-# Install build tools and SQLite library (needed to install the sqlite3 gem)
-RUN apt-get update -qq && apt-get install -y build-essential libsqlite3-dev
+# Install build tools and dependencies for building gems.
+# Pin the package versions as determined:
+# - build-essential version 12.9
+# - libsqlite3-dev version 3.40.1-2+deb12u1
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+      build-essential=12.9 \
+      libsqlite3-dev=3.40.1-2+deb12u1 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Install app dependencies (Gemfile should list all gems)
+# Copy Gemfile and Gemfile.lock, then install gems
+# Pin bundler to version 2.6.3 as per Gemfile.lock
 COPY Gemfile Gemfile.lock ./
-RUN gem install bundler && bundle install
+RUN gem install bundler:2.6.3 && bundle install --without development test
 
 # Install 'rerun' for auto-reloading in development
-RUN gem install rerun
+RUN gem install rerun:0.14.0
 
-# Copy the application code
+# Copy the rest of the application source code
 COPY . .
 
-# Expose Sinatra's default port
+# Stage 2: Final image – only includes runtime necessities
+FROM ruby:3.2-slim
+
+# Install runtime dependencies.
+# Pin libsqlite3-0 version to 3.40.1-2+deb12u1
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+      libsqlite3-0=3.40.1-2+deb12u1 && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy app code and gem bundles from the builder stage
+COPY --from=builder /app .
+COPY --from=builder /usr/local/bundle /usr/local/bundle
+
+# Set environment to production
+ENV RACK_ENV=production
+
+# Expose the port used by the Sinatra app
 EXPOSE 4568
 
-# Set environment to development by default
-ENV RACK_ENV=development
-
-# Command: use rerun to restart the app on code changes
+# Use exec form to run the Sinatra app in production
 CMD ["rerun", "--", "ruby", "app.rb", "-o", "0.0.0.0"]
