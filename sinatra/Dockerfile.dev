@@ -41,7 +41,7 @@ COPY --from=builder /app .
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Set environment to production
-ENV RACK_ENV=production
+ENV RACK_ENV=development
 
 # Expose the port used by the Sinatra app
 EXPOSE 4568
