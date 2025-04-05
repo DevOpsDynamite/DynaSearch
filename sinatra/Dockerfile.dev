@@ -46,5 +46,5 @@ ENV RACK_ENV=production
 # Expose the port used by the Sinatra app
 EXPOSE 4568
 
-# Use exec form to run the Sinatra app in production
+# Use rerun form to run the Sinatra app in production
 CMD ["rerun", "--", "ruby", "app.rb", "-o", "0.0.0.0"]
