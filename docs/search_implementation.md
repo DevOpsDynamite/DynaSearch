@@ -1,6 +1,4 @@
-# Untitled
-
-`# Search Implementation: From LIKE to SQLite FTS5`
+# Search Implementation: From LIKE to SQLite FTS5`
 
 ## Written by ChatGPT based on my guidance of what I have done. Have read it thoroughly and changed wherever it hallucinated, or misinterpreted my prompt. 
 
@@ -24,6 +22,7 @@ The previous search implementation used the standard SQL `LIKE` operator with le
 ```sql
 SELECT * FROM pages WHERE language = ? AND content LIKE ?
 -- Example Parameter Binding: ['en', '%searchterm%']`
+```
 
 ### Limitations
 
@@ -78,7 +77,6 @@ Benchmarking was performed using the `benchmark_search.rb` script on April 6, 20
 | 'a_less_common_word' | 0.0019 | 0.0002 | 9.5x |
 | 'multi word phrase' | 0.0009 | 0.0001 | 9.0x |
 
-Eksportér til Sheets
 
 **Analysis:**
 The results clearly demonstrate a significant performance improvement using FTS5. Speedups ranged from **3.5x to 12.0x** across the tested terms. While the absolute times are currently small (milliseconds), this efficiency gain is crucial as the database size increases, ensuring a responsive search experience. FTS5 consistently outperformed `LIKE '%term%'`.
@@ -106,7 +104,7 @@ The implementation of SQLite FTS5 successfully meets the goals outlined in the u
 
 This change provides a foundation for a more robust and scalable search experience within the application. Future considerations might include exploring more advanced FTS5 query syntax or tokenizers if needed.
 
-## 6. Appendix / Links (Optional)
+## 6. Appendix / Links
 
 - `fts5.sql`: SQL script for FTS5 table and trigger setup.
 - `benchmark_search.rb`: Script used for performance benchmarking.
