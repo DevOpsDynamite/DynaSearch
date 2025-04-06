@@ -1,3 +1,12 @@
+-- Adds FTS5 virtual table and synchronization triggers for the 'pages' table.
+-- Includes DROP statements to make the script idempotent (re-runnable).
+
+-- Drop existing FTS table and triggers if they exist
+DROP TRIGGER IF EXISTS pages_ai;
+DROP TRIGGER IF EXISTS pages_ad;
+DROP TRIGGER IF EXISTS pages_au;
+DROP TABLE IF EXISTS pages_fts;
+
 -- Create the FTS5 virtual table, indexing the 'content' column
 -- 'pages_fts' is the name of our new virtual table
 -- 'content' refers to the column in the 'pages' table we want to index
@@ -12,6 +21,8 @@ CREATE VIRTUAL TABLE pages_fts USING fts5(
     -- Use the default tokenizer (unicode61) or specify: tokenize = 'unicode61'
     -- Or use 'porter' for English stemming: tokenize = 'porter'
 );
+
+-- Create Triggers for Synchronization --
 
 -- Trigger for INSERTs on the 'pages' table
 -- When a new row is inserted into 'pages', insert the corresponding
@@ -38,3 +49,9 @@ CREATE TRIGGER pages_au AFTER UPDATE ON pages BEGIN
     WHERE rowid = old.rowid;
 END;
 
+-- Reminder: After running this script against your database using:
+-- sqlite3 whoknows.db < fts5.sql
+--
+-- You MUST run the following command once to populate the FTS table
+-- with your existing data:
+-- sqlite3 whoknows.db "INSERT INTO pages_fts (rowid, content, language) SELECT rowid, content, language FROM pages;"
