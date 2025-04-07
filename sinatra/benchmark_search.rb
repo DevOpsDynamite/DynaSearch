@@ -18,9 +18,9 @@ unless File.exist?(DB_PATH)
   exit(1)
 end
 
-# Terms to test (use terms relevant to your data!)
-search_terms = ["technology", "database", "performance", "Copenhagen", "a_less_common_word", "multi word phrase"] # Add more realistic terms
-language = 'en' # Or 'da', or test both
+# Terms to test 
+search_terms = ["technology", "database", "performance", "Copenhagen", "spring java", "database performance"] 
+language = 'en' 
 
 # --- Database Connection ---
 db = SQLite3::Database.new(DB_PATH)
@@ -35,7 +35,7 @@ search_terms.each do |q|
   puts "Term: '#{q}'"
 
   like_time = Benchmark.measure do
-    # Important: Use the exact LIKE query structure you had before
+    # Important: Use the exact LIKE query structure we had before
     db.execute('SELECT title FROM pages WHERE language = ? AND content LIKE ?', [language, "%#{q}%"])
   end
   puts "  LIKE query took: #{format('%.4f', like_time.real)} seconds"

@@ -74,8 +74,8 @@ Benchmarking was performed using the `benchmark_search.rb` script on April 6, 20
 | 'database' | 0.0007 | 0.0002 | 3.5x |
 | 'performance' | 0.0007 | 0.0001 | 7.0x |
 | 'Copenhagen' | 0.0012 | 0.0001 | 12.0x |
-| 'a_less_common_word' | 0.0019 | 0.0002 | 9.5x |
-| 'multi word phrase' | 0.0009 | 0.0001 | 9.0x |
+| 'spring java' | 0.0019 | 0.0002 | 9.5x |
+| 'database performance' | 0.0009 | 0.0001 | 9.0x |
 
 
 **Analysis:**
