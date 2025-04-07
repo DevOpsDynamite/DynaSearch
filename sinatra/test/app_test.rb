@@ -36,7 +36,6 @@ class WhoKnowsTest < Minitest::Test
     schema_file = File.join(File.dirname(__dir__), 'schema.sql')
     db.execute_batch(File.read(schema_file)) if File.exist?(schema_file)
 
-    # >>> ADDED THIS SECTION TO LOAD FTS5 SCHEMA <<<
     # Load the FTS5 schema additions
     fts5_schema_file = File.join(File.dirname(__dir__), 'fts5.sql')
     if File.exist?(fts5_schema_file)
@@ -45,7 +44,6 @@ class WhoKnowsTest < Minitest::Test
       # Optional: Warn if the file is missing, helps debugging CI environments
       puts "WARNING: FTS5 setup file not found at #{fts5_schema_file}. FTS5 tables/triggers will be missing in test DB."
     end
-    # >>> END ADDED SECTION <<<
 
     # Close the connection used for setup
     db.close
@@ -91,13 +89,28 @@ class WhoKnowsTest < Minitest::Test
   def test_register
     # First registration should succeed
     response = register('user1', 'default')
-    assert_includes response.body, 'You were successfully registered and can login now'
+    assert_includes response.body, 'You were successfully registered and are now logged in.'
+    # Make sure we are actually logged in (e.g., check for logout link)
+    assert_includes response.body, 'href="/api/logout">Log out [user1]</a>'
 
-    # Trying to register with the same username should fail
+    logout
+    # Verify logout worked (e.g., check for login link)
+    # assert_includes last_response.body, 'href="/login">Login</a>' # Old assertion with incorrect text
+    assert_includes last_response.body, 'href="/login">Log in</a>'  # Corrected assertion with actual text
+
+    # Trying to register with the same username should now fail (as user is logged out)
     response = register('user1', 'default')
-    assert_includes response.body, 'The username is already taken'
 
-    # Test missing username
+    # --- Assertions for failed registration ---
+    assert_includes response.body, 'The username is already taken'
+    # Add checks to ensure it's the registration page showing the error:
+    assert response.ok? # Should be status 200 OK (re-rendered form)
+    refute response.redirect? # Should not redirect on validation failure
+    assert_includes response.body, '<form action="/api/register"'
+
+
+
+    # Test missing username (user is already logged out from previous step)
     response = register('', 'default')
     assert_includes response.body, 'You have to enter a username'
 
