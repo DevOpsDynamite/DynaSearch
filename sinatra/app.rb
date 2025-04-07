@@ -207,7 +207,8 @@ post '/api/register' do
 
   if error
     # Re-render the registration form with an error message
-    erb :register, locals: { error: error }
+    # Pass the submitted username and email back to the form for better UX
+    erb :register, locals: { error: error, username: params[:username], email: params[:email] }
   else
     # Hash the password using BCrypt
     hashed_password = hash_password(params[:password])
@@ -216,8 +217,19 @@ post '/api/register' do
     db.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
                [params[:username], params[:email], hashed_password])
 
-    flash[:notice] = 'You were successfully registered and can login now'
-    redirect '/login'
+
+    # Get the ID of the user just created
+    new_user_id = db.last_insert_row_id
+
+    # Log the new user in by setting the session
+    session[:user_id] = new_user_id
+
+    # Update the flash message
+    flash[:notice] = 'You were successfully registered and are now logged in.'
+
+    # Redirect to the main page instead of the login page
+    redirect '/'
+
   end
 end
 
