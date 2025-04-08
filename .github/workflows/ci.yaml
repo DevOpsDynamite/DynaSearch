@@ -52,7 +52,8 @@ jobs:
 
       # Verify Hadolint installation
       - name: Verify Hadolint installation
-        run: hadolint --version
+        run: |
+          hadolint --version
 
       # Lint Dockerfile.dev
       - name: Lint Dockerfile.dev
