@@ -50,10 +50,16 @@ jobs:
           curl -sSL https://github.com/hadolint/hadolint/releases/download/v2.9.0/hadolint-linux-amd64 -o /usr/local/bin/hadolint
           chmod +x /usr/local/bin/hadolint
 
-      - name: Lint Dockerfile
-        run: |
-          hadolint Dockerfile.dev
+      # Verify Hadolint installation
+      - name: Verify Hadolint installation
+        run: hadolint --version
 
-      - name: Lint Dockerfile
+      # Lint Dockerfile.dev
+      - name: Lint Dockerfile.dev
         run: |
-          hadolint Dockerfile.prod
+          hadolint sinatra/Dockerfile.dev
+
+      # Lint Dockerfile.prod
+      - name: Lint Dockerfile.prod
+        run: |
+          hadolint sinatra/Dockerfile.prod
