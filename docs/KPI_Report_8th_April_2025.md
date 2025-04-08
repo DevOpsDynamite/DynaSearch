@@ -32,8 +32,7 @@ To view the number of unregistered users, we would have to set up nginx in order
 
 ### The total number of active users: Unknown
 
-Since we are not logging user activity yet, we do not know the number of users who uses the application frequently. 
-
+Since we are not logging user activity yet, we do not know the number of users who use the application frequently.
 ## Searches
 
 ### Average number of searches per day: Unknown
