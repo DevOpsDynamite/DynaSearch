@@ -7,8 +7,7 @@
 
 We used Azure Monitor with percentage CPU metric and got this overview for the past 30 days. The average CPU load was 0.527%, with peaks reaching 1.6%.
 
-These numbers indicates sufficient CPU resources for our application.
-
+These numbers indicate sufficient CPU resources for our application.
 ## CPU usage: Docker container
 
 The Docker container has the following CPU usage stats:
