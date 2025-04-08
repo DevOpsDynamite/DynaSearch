@@ -21,8 +21,7 @@ The stats indicate a low CPU usage on the Docker container, which aligns well wi
 
 ### Registered users per 8th April: **10**
 
-To view the total number of registered users, we SSH’ed into our VM and changed the directory to where our database is located. From there, we called the SQLite3 command + the database name, which allows us to perform qeueries on our database. Then we inquired the total amount of registered users from the database, with the qeury: `SELECT COUNT (*) FROM users;`
-
+To view the total number of registered users, we SSH’ed into our VM and changed the directory to where our database is located. From there, we called the SQLite3 command + the database name, which allows us to perform queries on our database. Then we inquired the total amount of registered users from the database, with the query: `SELECT COUNT (*) FROM users;`
 ## Unregistered Users
 
 ### Unregistered users per 8th April: Unkown
