@@ -2,7 +2,8 @@
 
 ## CPU usage: Azure Production VM
 
-![cpu.png](attachment:43ff0ac8-6edd-476b-861f-2d7a5c02684e:cpu.png)
+![image](https://github.com/user-attachments/assets/0820f22b-fe24-4d59-8b72-aa04844de15d)
+
 
 We used Azure Monitor with percentage CPU metric and got this overview for the past 30 days. The average CPU load was 0.527%, with peaks reaching 1.6%.
 
@@ -12,7 +13,8 @@ These numbers indicates sufficient CPU resources for our application.
 
 The Docker container has the following CPU usage stats:
 
-![image.png](attachment:2199d17e-1976-44a5-9de2-236ad43c6d1a:image.png)
+![image](https://github.com/user-attachments/assets/4c1ddaac-7d71-4b74-9b30-0395f0f9ab85)
+
 
 The stats indicate a low CPU usage on the Docker container, which aligns well with our current knowledge about Docker containers being lightweight.
 
