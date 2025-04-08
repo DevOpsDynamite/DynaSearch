@@ -24,8 +24,7 @@ The stats indicate a low CPU usage on the Docker container, which aligns well wi
 To view the total number of registered users, we SSH’ed into our VM and changed the directory to where our database is located. From there, we called the SQLite3 command + the database name, which allows us to perform queries on our database. Then we inquired the total amount of registered users from the database, with the query: `SELECT COUNT (*) FROM users;`
 ## Unregistered Users
 
-### Unregistered users per 8th April: Unkown
-
+### Unregistered users per 8th April: Unknown
 To view the number of unregistered users, we would have to set up nginx in order to access logs on how many unique users visits our website. Nginx registers IP-addresses, which makes it possible to calculate the accurate number.
 
 ## Active Users
