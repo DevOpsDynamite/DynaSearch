@@ -40,10 +40,9 @@ We could either log the number of searches using Nginx or Azure Application Insi
 
 ## Cost of the Infrastructure
 
-The **total** cost of the infrastrucure since launch: **39.35 DKK**
+The **total** cost of the infrastructure since launch: **39.35 DKK**
 
-The current **monthy** cost of the infrastucture: **15.08 DKK**
-
+The current **monthly** cost of the infrastructure: **15.08 DKK**
 This number includes only the VM on Azure Cloud Services.
 
 **Hosting on one.com:** From August 2025 the cost of hosting is will increase from **0 DKK to 119 DKK annually**, but we currently have a free subscription.
