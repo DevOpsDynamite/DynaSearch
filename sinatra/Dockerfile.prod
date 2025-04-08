@@ -1,57 +1,46 @@
-# Stage 1: Builder – install gems and assets
-FROM ruby:3.2-slim AS builder
-
-# Install build tools and dependencies for building gems.
-# Pin the package versions as determined:
-# - build-essential version 12.9
-# - libsqlite3-dev version 3.40.1-2+deb12u1
-RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
-      build-essential=12.9 \
-      libsqlite3-dev=3.40.1-2+deb12u1 && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Copy Gemfile and Gemfile.lock, then install gems
-# Pin bundler to version 2.6.3 as per Gemfile.lock
-COPY Gemfile Gemfile.lock ./
-RUN gem install bundler:2.6.3 && bundle install --without development test
-
-# Copy application source code
-COPY . .
-
 # Stage 2: Final image – only includes runtime necessities
 FROM ruby:3.2-slim
 
-# Install runtime dependencies (no build tools).
-# Pin libsqlite3-0 version to 3.40.1-2+deb12u1
+# Install runtime dependencies...
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
       libsqlite3-0=3.40.1-2+deb12u1 && \
     rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user and group for security
+# Create non-root user...
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin -c "Application user" appuser
 
 WORKDIR /app
 
-# Copy app code and gem bundles from builder stage
+# Copy app code and gem bundles...
 COPY --from=builder /app .
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 
-# Change ownership of the application files and gems to the non-root user
-# This ensures the user can read/execute necessary files
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh # Ensure it's executable
+
+# Change ownership of app files (excluding /app/data initially, entrypoint handles it)
+# Note: Only chown /app and /usr/local/bundle now.
+# Let the entrypoint handle /app/data ownership at runtime.
 RUN chown -R appuser:appuser /app /usr/local/bundle
 
-# Set environment to production
+# Set environment, expose port...
 ENV RACK_ENV=production
-
-# Expose the port used by the Sinatra app
 EXPOSE 4568
 
-# Switch to the non-root user before running the application
-USER appuser
+# Switch to the non-root user BEFORE entrypoint/cmd if possible,
+# but entrypoint needs to run chown, so it might need root temporarily
+# Simpler: Run entrypoint as root, then exec CMD as appuser (requires modification)
+# Easier: Run entrypoint as root, chown, then exec CMD (which runs as root - less ideal)
+# Best: Run entrypoint as root, chown, then use gosu or su-exec to drop privileges before exec "$@"
 
-# Use exec form to run the Sinatra app in production
+# --- Let's try the simplest approach first: Run entrypoint as root ---
+# USER appuser # <--- Comment this out or remove temporarily
+
+# Set the entrypoint
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Keep the CMD - this is passed as arguments ("$@") to the entrypoint
 CMD ["bundle", "exec", "ruby", "app.rb", "-o", "0.0.0.0", "-p", "4568"]
+
