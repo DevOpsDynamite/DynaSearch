@@ -91,14 +91,23 @@ get '/' do
   q = params[:q]
   language = params[:language] || 'en'
 
-  @search_results = if q.nil? || q.empty?
-                      []
-                    else
-                      db.execute(
-                        'SELECT * FROM pages WHERE language = ? AND content LIKE ?',
-                        [language, "%#{q}%"]
-                      )
-                    end
+  @search_results = []
+  if q && !q.strip.empty?
+    # FTS5 Search Query
+    # 1. Search the pages_fts table using MATCH for the query 'q'.
+    # 2. Join back to the original 'pages' table using rowid.
+    # 3. Filter by the requested language on the original 'pages' table.
+    # 4. Order by FTS5 rank (descending - higher rank is more relevant).
+    sql = <<-SQL
+      SELECT p.*
+      FROM pages p
+      JOIN pages_fts f ON p.rowid = f.rowid
+      WHERE f.pages_fts MATCH ? AND p.language = ?
+      ORDER BY f.rank DESC; -- Added relevance ranking here (Task 5)
+    SQL
+
+    @search_results = db.execute(sql, [q, language])
+  end
 
   # Render the ERB template named "search"
   erb :search
@@ -198,7 +207,8 @@ post '/api/register' do
 
   if error
     # Re-render the registration form with an error message
-    erb :register, locals: { error: error }
+    # Pass the submitted username and email back to the form for better UX
+    erb :register, locals: { error: error, username: params[:username], email: params[:email] }
   else
     # Hash the password using BCrypt
     hashed_password = hash_password(params[:password])
@@ -207,8 +217,19 @@ post '/api/register' do
     db.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
                [params[:username], params[:email], hashed_password])
 
-    flash[:notice] = 'You were successfully registered and can login now'
-    redirect '/login'
+
+    # Get the ID of the user just created
+    new_user_id = db.last_insert_row_id
+
+    # Log the new user in by setting the session
+    session[:user_id] = new_user_id
+
+    # Update the flash message
+    flash[:notice] = 'You were successfully registered and are now logged in.'
+
+    # Redirect to the main page instead of the login page
+    redirect '/'
+
   end
 end
 
