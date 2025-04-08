@@ -2,7 +2,7 @@ name: Continuous Delivery
 
 on:
   push:
-    branches: [ "main" ]  # Trigger on pushes to main branch
+    branches: [ "main", "feature/docker-update" ]  # Trigger on pushes to main branch
 
 jobs:
   build-and-push:
@@ -27,7 +27,7 @@ jobs:
     
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: sinatra
           file: sinatra/Dockerfile.prod          # use the production Dockerfile

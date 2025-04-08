@@ -22,7 +22,7 @@ docker-prod-build:
 
 # Run the production image:
 docker-prod-up:
-	docker compose -f docker-compose.prod.yml up
+	docker compose -f docker-compose.prod.yml up -d
 
 # Run tests inside the development container (if you have a test suite)
 docker-test:
