@@ -47,8 +47,9 @@ jobs:
       
       - name: Install Hadolint
         run: |
-          curl -sSL https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-linux-amd64 -o /usr/local/bin/hadolint
-          chmod +x /usr/local/bin/hadolint
+          wget -O hadolint "https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64"
+          chmod +x hadolint
+          sudo mv hadolint /usr/local/bin/hadolint
 
       # Verify Hadolint installation
       - name: Verify Hadolint installation
