@@ -1,36 +1,74 @@
+# Dockerfile.prod
+# Updated: Tuesday, April 8, 2025 at 6:06 PM CEST
+
 # Stage 1: Builder – install gems and assets
 FROM ruby:3.2-slim AS builder
 
-# Install build tools and dependencies for building gems
-RUN apt-get update -qq && apt-get install -y build-essential libsqlite3-dev
+# Install build tools and dependencies for building gems.
+# Pin the package versions as determined:
+# - build-essential version 12.9
+# - libsqlite3-dev version 3.40.1-2+deb12u1
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+      build-essential=12.9 \
+      libsqlite3-dev=3.40.1-2+deb12u1 && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install app gems (without dev and test groups for a leaner production image)
+# Copy Gemfile and Gemfile.lock, then install gems
+# Pin bundler to version 2.6.3 as per Gemfile.lock
 COPY Gemfile Gemfile.lock ./
-RUN gem install bundler && bundle install --without development test
+RUN gem install bundler:2.6.3 && bundle install --without development test
 
-# Copy application source code
+# Copy application source code (ensure .dockerignore excludes sensitive/unneeded files)
 COPY . .
 
 # Stage 2: Final image – only includes runtime necessities
 FROM ruby:3.2-slim
 
-# Install runtime dependencies (no build tools)
-RUN apt-get update -qq && apt-get install -y libsqlite3-0 && rm -rf /var/lib/apt/lists/*
+# Install runtime dependencies (no build tools).
+# Pin libsqlite3-0 version to 3.40.1-2+deb12u1
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+      libsqlite3-0=3.40.1-2+deb12u1 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user and group for security principals
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin -c "Application user" appuser
 
 WORKDIR /app
 
 # Copy app code and gem bundles from builder stage
-COPY --from=builder /app . 
+COPY --from=builder /app .
 COPY --from=builder /usr/local/bundle /usr/local/bundle
+
+# Copy the entrypoint script into the image
+COPY docker-entrypoint.sh /usr/local/bin/
+# Ensure the entrypoint script is executable
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Change ownership of the application files and gems to the non-root user
+# The entrypoint script will handle ownership of /app/data at runtime
+RUN chown -R appuser:appuser /app /usr/local/bundle
 
 # Set environment to production
 ENV RACK_ENV=production
 
-# Expose port
+# Expose the port used by the Sinatra app
 EXPOSE 4568
 
-# Use an appropriate command to run the Sinatra app in production
-# (Use exec form to ensure the process receives signals properly)
+# NOTE on USER instruction:
+# USER appuser
+# This line is commented out for the simpler fix. The entrypoint script needs to run as root
+# to be able to 'chown /app/data'. Consequently, the CMD executed by the entrypoint
+# will also run as root. For a more secure setup where the final CMD runs as 'appuser',
+# you would need to install 'gosu' or 'su-exec' and modify the entrypoint script
+# to drop privileges before the 'exec "$@"' line.
+
+# Set the entrypoint script to run when the container starts
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Use exec form to run the Sinatra app in production
+# This command is passed as arguments ("$@") to the entrypoint script
 CMD ["bundle", "exec", "ruby", "app.rb", "-o", "0.0.0.0", "-p", "4568"]
