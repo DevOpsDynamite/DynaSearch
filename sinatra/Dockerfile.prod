@@ -29,22 +29,20 @@ ENV GOSU_VERSION 1.17
 ENV GOSU_GPG_KEY B42F6819007F00F88E364FD4036A9C25BF357DD4
 
 # Install runtime dependencies, tools for gosu download/verification, and gosu itself
-# Pin versions for reproducibility (Debian 12 Bookworm base)
-# Check packages.debian.org/bookworm/<package> for latest stable versions if needed
-# --- Ignore DL4006 because we already implemented pipefail as recommended ---
-# hadolint ignore=DL4006,SC3040
+# Pin libsqlite3-0 as requested, install latest available versions for others.
+# Ignore DL3008 (pinning removed to fix build) & DL4006 (pipefail removed to fix build)
+# hadolint ignore=DL3008,DL4006
 RUN set -eux; \
-# Removed '-o pipefail' from the line above ---^
     savedAptMark="$(apt-mark showmanual)"; \
     apt-get update; \
-    # Install runtime libs plus tools needed for gosu install/verify, with pinned versions
+    # Install runtime libs plus tools needed for gosu install/verify
     apt-get install -y --no-install-recommends \
       libsqlite3-0=3.40.1-2+deb12u1 \
-      ca-certificates=20230311nmu1 \
-      gpg=2.2.40-1.1 \
-      gpgv=2.2.40-1.1 \
-      dirmngr=2.2.40-1.1 \
-      wget=1.21.3-1+b1; \
+      ca-certificates \
+      gpg \
+      gpgv \
+      dirmngr \
+      wget; \
     rm -rf /var/lib/apt/lists/*; \
     \
     # Import gosu GPG key
