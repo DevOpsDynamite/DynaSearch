@@ -1,3 +1,6 @@
+# Dockerfile.prod
+# Updated: Wednesday, April 9, 2025 at 9:50 AM CEST
+
 # Stage 1: Builder – install gems and assets
 FROM ruby:3.2-slim AS builder
 
@@ -26,8 +29,7 @@ FROM ruby:3.2-slim
 
 # Set version for gosu (using preferred ENV syntax)
 ENV GOSU_VERSION=1.17
-# Set GPG key as build-time argument (using ARG)
-ARG GOSU_GPG_KEY=B42F6819007F00F88E364FD4036A9C25BF357DD4
+# GPG Key ID is hardcoded below where used
 
 # Install runtime dependencies, tools for gosu download/verification, and gosu itself
 # Pin libsqlite3-0 as requested, install latest available versions for others.
@@ -43,11 +45,14 @@ RUN set -eux; \
       dirmngr \
       gpg-agent \
       wget; \
-    rm -rf /var/lib/apt/lists/*; \
-    \
-    # Import gosu GPG key (using ARG GOSU_GPG_KEY now)
-    gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$GOSU_GPG_KEY" || \
-    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$GOSU_GPG_KEY"; \
+    rm -rf /var/lib/apt/lists/*
+
+# Layer 2: Download and verify gosu using the installed tools
+RUN set -eux; \
+    # Import gosu GPG key (Hardcoded ID)
+    gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "B42F6819007F00F88E364FD4036A9C25BF357DD4" || \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "B42F6819007F00F88E364FD4036A9C25BF357DD4"; \
+    # Replaced variable with actual key ID ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     \
     # Download gosu binary and signature using wget -q (quiet)
     dpkgArch="$(dpkg --print-architecture)"; \
