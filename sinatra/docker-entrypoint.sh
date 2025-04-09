@@ -1,13 +1,12 @@
 #!/bin/sh
 # docker-entrypoint.sh
 
-# Set strict error checking
+# Enable strict error handling
 set -e
 
-# Take ownership of the data directory.
-# This ensures the appuser can write to the volume.
-# Use 'chown -R' if subdirectories might be created by the volume mount itself.
+# Ensure the data directory is writable by the non-root user.
+# If the mounted volume might not have correct permissions, this step is necessary.
 chown appuser:appuser /app/data
 
-# Execute the original command (CMD) passed to the container
-exec "$@"
+# Drop privileges to run the CMD as appuser.
+exec gosu appuser "$@"
