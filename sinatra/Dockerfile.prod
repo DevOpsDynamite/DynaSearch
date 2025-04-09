@@ -67,9 +67,10 @@ RUN set -eux; \
     rm /usr/local/bin/gosu.asc; \
     rm -rf /root/.gnupg
 
-# Layer 3: Purge the temporary build tools
+# Layer 3: Purge the temporary build tools (KEEPING gpgv for apt)
 RUN set -eux; \
-    apt-get purge -y --auto-remove gpg gpgv dirmngr gpg-agent wget; \
+    apt-get purge -y --auto-remove gpg dirmngr gpg-agent wget; \
+    # Removed 'gpgv' from the purge list ---^
     rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user and group for security principals
