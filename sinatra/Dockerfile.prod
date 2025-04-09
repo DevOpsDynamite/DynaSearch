@@ -31,11 +31,10 @@ ENV GOSU_GPG_KEY B42F6819007F00F88E364FD4036A9C25BF357DD4
 # Install runtime dependencies, tools for gosu download/verification, and gosu itself
 # Pin versions for reproducibility (Debian 12 Bookworm base)
 # Check packages.debian.org/bookworm/<package> for latest stable versions if needed
-# --- Ignore SC3040 because pipefail is supported by the shell in ruby:slim ---
-# shellcheck disable=SC3040
 # --- Ignore DL4006 because we already implemented pipefail as recommended ---
 # hadolint ignore=DL4006,SC3040
-RUN set -euxo pipefail; \
+RUN set -eux; \
+# Removed '-o pipefail' from the line above ---^
     savedAptMark="$(apt-mark showmanual)"; \
     apt-get update; \
     # Install runtime libs plus tools needed for gosu install/verify, with pinned versions
