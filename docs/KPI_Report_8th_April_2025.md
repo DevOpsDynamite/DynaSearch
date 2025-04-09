@@ -45,8 +45,7 @@ The **total** cost of the infrastructure since launch: **39.35 DKK**
 The current **monthly** cost of the infrastructure: **15.08 DKK**
 This number includes only the VM on Azure Cloud Services.
 
-**Hosting on one.com:** From August 2025 the cost of hosting is will increase from **0 DKK to 119 DKK annually**, but we currently have a free subscription.
-
+**Hosting on one.com:** From August 2025 the cost of hosting will increase from **0 DKK to 119 DKK annually**, but we currently have a free subscription.
 **Database:** We do not yet have a managed database on Azure. The estimated cost when this is implemented, would be: **116.26 DKK monthly**.
 
 The **annual budget forecast** based on these numbers is calculated to: **1700 DKK**
