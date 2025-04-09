@@ -1,28 +1,37 @@
-version: '3.8' # Specify a version (optional but good practice)
+# docker-compose.prod.yml
+
+version: '3.8'
 
 services:
   app:
     image: ghcr.io/devopsdynamite/sinatra-app:latest
     env_file:
       - .env
-    #  - "4568:4568" # Nginx will handle external port mapping now
     volumes:
       - sinatra_data:/app/data
     restart: unless-stopped
 
   nginx:
-    image: nginx:stable-alpine # Use an official lightweight Nginx image
+    image: nginx:stable-alpine
     ports:
-      # Map host port 80 to Nginx container port 80
       - "80:80"
-      # We will add "443:443" later when setting up HTTPS
+      - "443:443" # Add port mapping for HTTPS
     volumes:
-      # Mount our custom config file into the container, read-only
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      # We will add volumes for SSL certificates later
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
     depends_on:
-      - app # Ensures 'app' container starts before 'nginx' (good practice)
+      - app
     restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot # Use official Certbot image
+    volumes:
+      # Mount shared volumes
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
 
 volumes:
   sinatra_data:
+  certbot_certs:
+  certbot_www:
