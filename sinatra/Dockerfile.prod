@@ -45,12 +45,9 @@ COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Copy the entrypoint script into the image
 COPY docker-entrypoint.sh /usr/local/bin/
-# Ensure the entrypoint script is executable
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Change ownership of the application files and gems to the non-root user
-# The entrypoint script will handle ownership of /app/data at runtime
-RUN chown -R appuser:appuser /app /usr/local/bundle
+# Change ownership and make entrypoint executable
+RUN chown -R appuser:appuser /app /usr/local/bundle && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Set environment to production
 ENV RACK_ENV=production
