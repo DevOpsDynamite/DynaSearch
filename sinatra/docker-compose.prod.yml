@@ -25,11 +25,13 @@ services:
     restart: unless-stopped
 
   certbot:
-    image: certbot/certbot # Use official Certbot image
+    image: certbot/certbot
     volumes:
-      # Mount shared volumes
       - certbot_certs:/etc/letsencrypt
       - certbot_www:/var/www/certbot
+    # Command to run renew check every 12 hours
+    # Nginx should pick up renewed certs from the /live/ symlinks
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --quiet; sleep 12h & wait $${!}; done;'"
 
 volumes:
   sinatra_data:
