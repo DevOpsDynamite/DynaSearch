@@ -3,9 +3,9 @@
 # Enable strict error handling
 set -e
 
-# Ensure the data directory is writable by the non-root user.
-# If the mounted volume might not have correct permissions, this step is necessary.
-chown appuser:appuser /app/data
+# Ensure the data directory AND ITS CONTENTS are writable by the non-root user.
+# Use -R for recursive ownership change.
+chown -R appuser:appuser /app/data
 
 # Drop privileges to run the CMD as appuser.
 exec gosu appuser "$@"
