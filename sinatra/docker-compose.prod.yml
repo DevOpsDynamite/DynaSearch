@@ -6,7 +6,8 @@ services:
     ports:
       - "4568:4568"
     volumes:
-      - /home/azureuser/safe:/app/data    # named volume for persistent data (e.g., SQLite DB file)
+      - sinatra_data:/app/data        # <-- Use the named volume 'sinatra_data' mounted to the same target '/app/data'
     restart: unless-stopped
-volumes:
+
+volumes: # This top-level definition tells Docker to manage 'sinatra_data'
   sinatra_data:
