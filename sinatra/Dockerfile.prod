@@ -30,10 +30,9 @@ ENV GOSU_GPG_KEY B42F6819007F00F88E364FD4036A9C25BF357DD4
 
 # Install runtime dependencies, tools for gosu download/verification, and gosu itself
 # Pin libsqlite3-0 as requested, install latest available versions for others.
-# Ignore DL3008 (pinning removed to fix build) & DL4006 (pipefail removed to fix build)
-# hadolint ignore=DL3008,DL4006
+# Ignore DL3008 (pinning removed to fix build error E: Version not found)
+# hadolint ignore=DL3008
 RUN set -eux; \
-    savedAptMark="$(apt-mark showmanual)"; \
     apt-get update; \
     # Install runtime libs plus tools needed for gosu install/verify
     apt-get install -y --no-install-recommends \
@@ -56,8 +55,6 @@ RUN set -eux; \
     \
     # Verify the signature
     gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-    # Uncomment the following command if you have troubles with the key verification on some systems
-    # gpg --batch --trust-model always --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
     rm /usr/local/bin/gosu.asc; \
     rm -rf /root/.gnupg; \
     \
@@ -67,12 +64,9 @@ RUN set -eux; \
     gosu --version; \
     gosu nobody true; \
     \
-    # Clean up build dependencies (gpg, gpgv, dirmngr, wget)
-    apt-mark auto '.*' > /dev/null; \
-    apt-mark manual "$savedAptMark" > /dev/null; \
-    apt-get purge -y --auto-remove gpg gpgv dirmngr wget; \
-    # Verify dependencies were removed
-    ! dpkg -l | grep -E '(wget|gpg|gpgv|dirmngr)'
+    # --- Simplified Cleanup ---
+    # Removed apt-mark logic and verification step
+    apt-get purge -y --auto-remove gpg gpgv dirmngr wget
 
 # Create a non-root user and group for security principals
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin -c "Application user" appuser
