@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/devopsdynamite/sinatra-app:1089e2704110dfa9b69e931f88dce63937b86059   # use image from GHCR (built by CI)
+    image: ghcr.io/devopsdynamite/sinatra-app:b24bcfb173d8387569c046524f0e4b778a1d21d0   # use image from GHCR (built by CI)
     env_file:
       - .env            # production environment variables (DATABASE_PATH, SESSION_SECRET, etc.)
     ports:
