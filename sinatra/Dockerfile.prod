@@ -1,6 +1,3 @@
-# Dockerfile.prod
-# Updated: Wednesday, April 9, 2025 at 8:59 AM CEST # Updated based on current context time
-
 # Stage 1: Builder – install gems and assets
 FROM ruby:3.2-slim AS builder
 
@@ -32,27 +29,33 @@ ENV GOSU_VERSION 1.17
 ENV GOSU_GPG_KEY B42F6819007F00F88E364FD4036A9C25BF357DD4
 
 # Install runtime dependencies, tools for gosu download/verification, and gosu itself
-# Pin libsqlite3-0 version to 3.40.1-2+deb12u1
-RUN set -eux; \
+# Pin versions for reproducibility (Debian 12 Bookworm base)
+# Check packages.debian.org/bookworm/<package> for latest stable versions if needed
+# --- Ignore SC3040 because pipefail is supported by the shell in ruby:slim ---
+# shellcheck disable=SC3040
+# --- Ignore DL4006 because we already implemented pipefail as recommended ---
+# hadolint ignore=DL4006,SC3040
+RUN set -euxo pipefail; \
     savedAptMark="$(apt-mark showmanual)"; \
     apt-get update; \
-    # Install runtime libs plus tools needed for gosu install/verify
+    # Install runtime libs plus tools needed for gosu install/verify, with pinned versions
     apt-get install -y --no-install-recommends \
       libsqlite3-0=3.40.1-2+deb12u1 \
-      ca-certificates \
-      gnupg \
-      dirmngr \
-      wget; \
+      ca-certificates=20230311nmu1 \
+      gpg=2.2.40-1.1 \
+      gpgv=2.2.40-1.1 \
+      dirmngr=2.2.40-1.1 \
+      wget=1.21.3-1+b1; \
     rm -rf /var/lib/apt/lists/*; \
     \
     # Import gosu GPG key
     gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$GOSU_GPG_KEY" || \
     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$GOSU_GPG_KEY"; \
     \
-    # Download gosu binary and signature
+    # Download gosu binary and signature using wget -q (quiet)
     dpkgArch="$(dpkg --print-architecture)"; \
-    wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
-    wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
+    wget -q -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
+    wget -q -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
     \
     # Verify the signature
     gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
@@ -67,12 +70,12 @@ RUN set -eux; \
     gosu --version; \
     gosu nobody true; \
     \
-    # Clean up build dependencies (wget, gnupg, dirmngr)
+    # Clean up build dependencies (gpg, gpgv, dirmngr, wget)
     apt-mark auto '.*' > /dev/null; \
-    apt-mark manual $savedAptMark > /dev/null; \
-    apt-get purge -y --auto-remove gnupg dirmngr wget; \
+    apt-mark manual "$savedAptMark" > /dev/null; \
+    apt-get purge -y --auto-remove gpg gpgv dirmngr wget; \
     # Verify dependencies were removed
-    ! dpkg -l | grep -E '(wget|gnupg|dirmngr)'
+    ! dpkg -l | grep -E '(wget|gpg|gpgv|dirmngr)'
 
 # Create a non-root user and group for security principals
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin -c "Application user" appuser

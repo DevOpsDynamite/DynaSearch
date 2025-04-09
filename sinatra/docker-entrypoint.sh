@@ -1,5 +1,4 @@
 #!/bin/sh
-# docker-entrypoint.sh
 
 # Enable strict error handling
 set -e
