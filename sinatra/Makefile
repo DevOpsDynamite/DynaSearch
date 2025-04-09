@@ -23,7 +23,7 @@ docker-prod-build:
 # Run the production image:
 docker-prod-up:
 	# Ensure the specific image tag mentioned in the compose file is pulled
-	docker compose -f docker-compose.prod.yml pull
+	docker compose -f docker-compose.prod.yml up -d --pull always --remove-orphans
 	# Bring services up (or update them), run in background, and remove any orphaned containers
 	docker compose -f docker-compose.prod.yml up -d --remove-orphans
 

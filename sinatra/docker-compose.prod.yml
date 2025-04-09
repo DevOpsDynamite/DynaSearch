@@ -1,13 +1,28 @@
+version: '3.8' # Specify a version (optional but good practice)
+
 services:
   app:
-    image: ghcr.io/devopsdynamite/sinatra-app:b24bcfb173d8387569c046524f0e4b778a1d21d0   # use image from GHCR (built by CI)
+    image: ghcr.io/devopsdynamite/sinatra-app:latest
     env_file:
-      - .env            # production environment variables (DATABASE_PATH, SESSION_SECRET, etc.)
-    ports:
-      - "4568:4568"
+      - .env
+    #  - "4568:4568" # Nginx will handle external port mapping now
     volumes:
-      - sinatra_data:/app/data        # <-- Use the named volume 'sinatra_data' mounted to the same target '/app/data'
+      - sinatra_data:/app/data
     restart: unless-stopped
 
-volumes: # This top-level definition tells Docker to manage 'sinatra_data'
+  nginx:
+    image: nginx:stable-alpine # Use an official lightweight Nginx image
+    ports:
+      # Map host port 80 to Nginx container port 80
+      - "80:80"
+      # We will add "443:443" later when setting up HTTPS
+    volumes:
+      # Mount our custom config file into the container, read-only
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # We will add volumes for SSL certificates later
+    depends_on:
+      - app # Ensures 'app' container starts before 'nginx' (good practice)
+    restart: unless-stopped
+
+volumes:
   sinatra_data:
