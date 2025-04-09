@@ -34,20 +34,21 @@ ENV GOSU_GPG_KEY B42F6819007F00F88E364FD4036A9C25BF357DD4
 # hadolint ignore=DL3008
 RUN set -eux; \
     apt-get update; \
-    # Install runtime libs plus tools needed for gosu install/verify
+    # Install runtime libs plus tools needed for gosu install/verify (incl. gpg-agent)
     apt-get install -y --no-install-recommends \
       libsqlite3-0=3.40.1-2+deb12u1 \
       ca-certificates \
       gpg \
       gpgv \
       dirmngr \
+      gpg-agent \
       wget; \
+    # Add gpg-agent ^^^^^^^^^ here
     rm -rf /var/lib/apt/lists/*; \
     \
-    # Import gosu GPG key, adding --no-agent to avoid errors
-    gpg --batch --no-agent --keyserver hkps://keys.openpgp.org --recv-keys "$GOSU_GPG_KEY" || \
-    gpg --batch --no-agent --keyserver keyserver.ubuntu.com --recv-keys "$GOSU_GPG_KEY"; \
-    # Add --no-agent ^^^^^^^^^ here and here ^^^^^^^^^
+    # Import gosu GPG key (removed --no-agent)
+    gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$GOSU_GPG_KEY" || \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$GOSU_GPG_KEY"; \
     \
     # Download gosu binary and signature using wget -q (quiet)
     dpkgArch="$(dpkg --print-architecture)"; \
@@ -67,7 +68,8 @@ RUN set -eux; \
     \
     # --- Simplified Cleanup ---
     # Removed apt-mark logic and verification step
-    apt-get purge -y --auto-remove gpg gpgv dirmngr wget
+    # Add gpg-agent to purge list vvvvvvvvvv
+    apt-get purge -y --auto-remove gpg gpgv dirmngr gpg-agent wget
 
 # Create a non-root user and group for security principals
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin -c "Application user" appuser
