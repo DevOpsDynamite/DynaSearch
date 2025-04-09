@@ -24,11 +24,12 @@ COPY . .
 # Stage 2: Final image – runtime environment with privilege dropping via gosu
 FROM ruby:3.2-slim
 
-# Set versions for gosu and its key
-ENV GOSU_VERSION 1.17
-ENV GOSU_GPG_KEY B42F6819007F00F88E364FD4036A9C25BF357DD4
+# Set version for gosu (using preferred ENV syntax)
+ENV GOSU_VERSION=1.17
+# Set GPG key as build-time argument (using ARG)
+ARG GOSU_GPG_KEY=B42F6819007F00F88E364FD4036A9C25BF357DD4
 
-# Layer 1: Install runtime deps and temporary build tools
+# Install runtime dependencies, tools for gosu download/verification, and gosu itself
 # Pin libsqlite3-0 as requested, install latest available versions for others.
 # Ignore DL3008 (pinning removed to fix build error E: Version not found)
 # hadolint ignore=DL3008
@@ -42,11 +43,9 @@ RUN set -eux; \
       dirmngr \
       gpg-agent \
       wget; \
-    rm -rf /var/lib/apt/lists/*
-
-# Layer 2: Download and verify gosu using the installed tools
-RUN set -eux; \
-    # Import gosu GPG key
+    rm -rf /var/lib/apt/lists/*; \
+    \
+    # Import gosu GPG key (using ARG GOSU_GPG_KEY now)
     gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$GOSU_GPG_KEY" || \
     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$GOSU_GPG_KEY"; \
     \
@@ -70,7 +69,6 @@ RUN set -eux; \
 # Layer 3: Purge the temporary build tools (KEEPING gpgv for apt)
 RUN set -eux; \
     apt-get purge -y --auto-remove gpg dirmngr gpg-agent wget; \
-    # Removed 'gpgv' from the purge list ---^
     rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user and group for security principals
@@ -88,7 +86,7 @@ COPY docker-entrypoint.sh /usr/local/bin/
 RUN chown -R appuser:appuser /app /usr/local/bundle && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Set environment to production
+# Set environment to production (using preferred ENV syntax)
 ENV RACK_ENV=production
 
 # Expose the port used by the Sinatra app
