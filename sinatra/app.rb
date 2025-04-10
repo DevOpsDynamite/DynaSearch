@@ -192,17 +192,25 @@ post '/api/register' do
 
   error = nil
 
+  # Consider trimming input for checks and consistency
+  username = params[:username].to_s.strip
+  email = params[:email].to_s.strip
+  password = params[:password].to_s # Keep original for comparison/hashing unless you intend to disallow leading/trailing spaces
+  password2 = params[:password2].to_s
+
   # Validate input
-  if params[:username].to_s.strip.empty?
+  if username.empty?
     error = 'You have to enter a username'
-  elsif params[:email].to_s.strip.empty? || !params[:email].include?('@')
+  elsif email.empty? || !email.include?('@')
     error = 'You have to enter a valid email address'
-  elsif params[:password].to_s.strip.empty?
+  elsif password.strip.empty? # Check trimmed password for emptiness
     error = 'You have to enter a password'
-  elsif params[:password] != params[:password2]
+  elsif password != password2
     error = 'The two passwords do not match'
-  elsif db.execute('SELECT id FROM users WHERE username = ?', params[:username]).first
+  elsif db.execute('SELECT id FROM users WHERE username = ?', username).first
     error = 'The username is already taken'
+  elsif db.execute('SELECT id FROM users WHERE email = ?', email).first
+    error = 'This email is already registered' # Specific error message for existing email
   end
 
   if error
@@ -211,12 +219,11 @@ post '/api/register' do
     erb :register, locals: { error: error, username: params[:username], email: params[:email] }
   else
     # Hash the password using BCrypt
-    hashed_password = hash_password(params[:password])
+    hashed_password = hash_password(password) # Hash the original password
 
-    # Insert the new user into the database
+    # Insert the new user into the database using trimmed values
     db.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-               [params[:username], params[:email], hashed_password])
-
+               [username, email, hashed_password])
 
     # Get the ID of the user just created
     new_user_id = db.last_insert_row_id
@@ -229,7 +236,6 @@ post '/api/register' do
 
     # Redirect to the main page instead of the login page
     redirect '/'
-
   end
 end
 
