@@ -140,11 +140,31 @@ end
 
 # GET api pages
 get '/api/search' do
-  'Test api search'
+  content_type :json
+
+  q = params[:q]
+  language = params[:language] || 'en'
+  search_results = []
+
+  if q && !q.strip.empty?
+    sql = <<-SQL
+      SELECT p.*
+      FROM pages p
+      JOIN pages_fts f ON p.rowid = f.rowid
+      WHERE f.pages_fts MATCH ? AND p.language = ?
+      ORDER BY f.rank DESC;
+    SQL
+
+    search_results = db.execute(sql, [q, language])
+  end
+
+  search_results.to_json
 end
 
 get '/api/weather' do
-  'Test api weather'
+  content_type :json
+  forecast_data = get_cached_forecast
+  forecast_data.to_json
 end
 
 ################################################################################
