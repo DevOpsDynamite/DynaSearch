@@ -11,6 +11,7 @@ require 'digest'
 require 'bcrypt'
 require 'nokogiri'
 require 'open-uri'
+require 'active_support/core_ext/string/filters'
 
 set :bind, '0.0.0.0'
 set :port, 4568
@@ -98,7 +99,8 @@ get '/' do
     # 2. Join back to the original 'pages' table using rowid.
     # 3. Filter by the requested language on the original 'pages' table.
     # 4. Order by FTS5 rank (descending - higher rank is more relevant).
-    sql = <<-SQL
+    # Apply .squish here as well
+    sql = <<-SQL.squish # <--- MODIFIED HERE
       SELECT p.*
       FROM pages p
       JOIN pages_fts f ON p.rowid = f.rowid
@@ -140,11 +142,36 @@ end
 
 # GET api pages
 get '/api/search' do
-  'Test api search'
+  content_type :json
+
+  q = params[:q]
+  language = params[:language] || 'en'
+  search_results = []
+
+  if q && !q.strip.empty?
+    sql = <<-SQL.squish
+      SELECT p.*
+      FROM pages p
+      JOIN pages_fts f ON p.rowid = f.rowid
+      WHERE f.pages_fts MATCH ? AND p.language = ?
+      ORDER BY f.rank DESC;
+    SQL
+
+    search_results = db.execute(sql, [q, language])
+  end
+
+  { 
+        results: search_results, 
+        count: search_results.length,
+        query: q,
+        language: language 
+      }.to_json
 end
 
 get '/api/weather' do
-  'Test api weather'
+  content_type :json
+  forecast_data = get_cached_forecast
+  forecast_data.to_json
 end
 
 ################################################################################

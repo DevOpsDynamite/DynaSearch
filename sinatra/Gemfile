@@ -14,6 +14,8 @@ gem 'sinatra-contrib'
 gem 'sinatra-flash'
 gem 'sqlite3'
 gem 'rake'
+gem 'activesupport'
+
 
 group :test do
   gem 'minitest'
