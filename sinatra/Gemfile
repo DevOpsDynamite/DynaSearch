@@ -13,6 +13,7 @@ gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'sinatra-flash'
 gem 'sqlite3'
+gem 'activesupport'
 
 group :test do
   gem 'minitest'
