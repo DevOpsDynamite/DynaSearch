@@ -87,7 +87,7 @@ COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Copy the entrypoint script into the image
 COPY docker-entrypoint.sh /usr/local/bin/
-# Change ownership of app/gems *before* entrypoint runs, make entrypoint executable
+
 RUN chown -R appuser:appuser /app /usr/local/bundle && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
