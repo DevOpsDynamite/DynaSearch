@@ -160,7 +160,12 @@ get '/api/search' do
     search_results = db.execute(sql, [q, language])
   end
 
-  search_results.to_json
+  { 
+        results: search_results, 
+        count: search_results.length,
+        query: q,
+        language: language 
+      }.to_json
 end
 
 get '/api/weather' do
