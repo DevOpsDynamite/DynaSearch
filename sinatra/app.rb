@@ -99,8 +99,7 @@ get '/' do
     # 2. Join back to the original 'pages' table using rowid.
     # 3. Filter by the requested language on the original 'pages' table.
     # 4. Order by FTS5 rank (descending - higher rank is more relevant).
-    # Apply .squish here as well
-    sql = <<-SQL.squish # <--- MODIFIED HERE
+    sql = <<-SQL.squish
       SELECT p.*
       FROM pages p
       JOIN pages_fts f ON p.rowid = f.rowid
@@ -118,6 +117,7 @@ end
 get '/about' do
   erb :about
 end
+
 
 get '/weather' do
   @forecast_data = get_cached_forecast
