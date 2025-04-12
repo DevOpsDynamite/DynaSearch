@@ -7,7 +7,12 @@ name = "ruby"
 enabled = true
 
   [analyzers.meta]
-  runtime_version = "3.4.2"
+  runtime_version = "3.4.2" # Keep your specific Ruby version
+
+  # Add rules section to skip specific checks
+  [analyzers.rules]
+  # Skip the check preferring assert_not over refute using its ID
+  skip_checks = ["RB-RL1045"]
 
 [[analyzers]]
 name = "docker"
@@ -20,5 +25,6 @@ enabled = true
   ]
 
 # Example: Excluding a specific check if needed (find check codes on DeepSource docs)
+# This is the pattern we are now using above.
 # [analyzers.rules]
 # ruby = { skip_checks = ["RUBY-W1001"] }
