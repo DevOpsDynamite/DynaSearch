@@ -13,7 +13,7 @@ Make sure you have the following installed:
 
 ### 1. Check Ruby Version
 
-Ensure you have a compatible Ruby version installed (e.g., the version specified in `.ruby-version` if present, or the one used during development, like 3.4.2).
+Ensure you have a compatible Ruby version installed, should be 3.4.2 or newer.
 
 Bash
 
@@ -25,8 +25,8 @@ If you need to manage Ruby versions, consider using tools like `rbenv`, `rvm`, o
 
 Bash
 
-`git clone <your-repository-url>
-cd <repository-directory>`
+`git clone https://github.com/DevOpsDynamite/DynaSearch
+cd sinatra`
 
 ### 3. Environment Variables
 
