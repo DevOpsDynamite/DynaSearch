@@ -20,7 +20,7 @@ require 'active_support/core_ext/object/blank' # For present? and blank?
 set :bind, '0.0.0.0'
 set :port, 4568
 enable :sessions
-set :session_secret, ENV.fetch('SESSION_SECRET') { SecureRandom.hex(32) }
+set :session_secret, ENV.fetch('SESSION_SECRET')
 set :root, File.dirname(__FILE__)
 set :views, File.join(settings.root, 'views')
 
