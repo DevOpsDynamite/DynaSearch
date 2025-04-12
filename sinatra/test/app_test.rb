@@ -137,8 +137,8 @@ class WhoKnowsTest < Minitest::Test
     # 3. Attempt Duplicate Username Registration (while logged out)
     response = register('tester', 'password123')
     assert_equal 200, response.status # Should re-render form, not redirect
-    # FIX: Use assert_not instead of refute
-    assert_not last_response.redirect?, "Duplicate registration should not redirect"
+    # Use refute (compatible) instead of assert_not
+    refute last_response.redirect?, "Duplicate registration should not redirect"
     # Check it's the registration page showing the error
     assert_includes response.body, '<form action="/api/register"'
     assert_includes response.body, 'The username is already taken'
@@ -146,14 +146,14 @@ class WhoKnowsTest < Minitest::Test
     # 4. Attempt Duplicate Email Registration (while logged out)
     response = register('anotheruser', 'password123', nil, 'tester@example.com') # Use existing email
     assert_equal 200, response.status # Should re-render form
-    # FIX: Use assert_not instead of refute
-    assert_not last_response.redirect?, "Duplicate email registration should not redirect"
+    # Use refute (compatible) instead of assert_not
+    refute last_response.redirect?, "Duplicate email registration should not redirect"
     assert_includes response.body, '<form action="/api/register"'
     assert_includes response.body, 'This email is already registered'
   end
 
   def test_registration_validation_errors
-    # FIX: Call logout unconditionally to ensure logged-out state for validation tests below.
+    # Call logout unconditionally to ensure logged-out state for validation tests below.
     logout
 
     # Test missing username
@@ -213,8 +213,8 @@ class WhoKnowsTest < Minitest::Test
     # 4. Login with wrong password
     response = login('testlogin', 'wrongpassword')
     assert_equal 200, response.status # Re-renders login form
-    # FIX: Use assert_not instead of refute
-    assert_not last_response.redirect?, "Login with wrong password should not redirect"
+    # Use refute (compatible) instead of assert_not
+    refute last_response.redirect?, "Login with wrong password should not redirect"
     # Check it's the login page showing the error
     assert_includes response.body, '<form action="/api/login"'
     assert_includes response.body, 'Invalid username or password'
@@ -222,8 +222,8 @@ class WhoKnowsTest < Minitest::Test
     # 5. Login with non-existent username
     response = login('nosuchuser', 'password')
     assert_equal 200, response.status # Re-renders login form
-    # FIX: Use assert_not instead of refute
-    assert_not last_response.redirect?, "Login with non-existent user should not redirect"
+    # Use refute (compatible) instead of assert_not
+    refute last_response.redirect?, "Login with non-existent user should not redirect"
     assert_includes response.body, '<form action="/api/login"'
     assert_includes response.body, 'Invalid username or password'
   end
@@ -233,13 +233,11 @@ class WhoKnowsTest < Minitest::Test
     # Test loading the search page with no query
     get '/'
     assert last_response.ok?, "Search page should load without query. Status: #{last_response.status}"
-    # FIX: Update assertion to match the actual title in the view
     assert_includes last_response.body, '<title>DynaSearch 🧨</title>' # Check for correct title element
 
     # Test loading the search page with a query (on empty DB)
     get '/', { q: 'some search term', language: 'en' }
     assert last_response.ok?, "Search page should load with query. Status: #{last_response.status}"
-    # FIX: Update assertion to match the actual title in the view
     assert_includes last_response.body, '<title>DynaSearch 🧨</title>'
     # Optional: Check for a "no results" message if your view includes one
     # assert_includes last_response.body, "No results found for 'some search term'"
