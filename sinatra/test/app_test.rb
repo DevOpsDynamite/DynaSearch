@@ -15,6 +15,9 @@ Dotenv.load('.env.test', '.env')
 # Note: Often covered by '../app' but explicit is safer.
 require 'active_support/core_ext/object/blank'
 
+# Set a default dummy session secret for the test environment if not already set
+ENV['SESSION_SECRET'] ||= 'a_secure_random_string_for_testing_purposes_only_1234567890_1234567890'
+
 # Load the Sinatra application entry point
 require_relative '../app'
 
