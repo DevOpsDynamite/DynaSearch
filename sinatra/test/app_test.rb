@@ -137,7 +137,8 @@ class WhoKnowsTest < Minitest::Test
     # 3. Attempt Duplicate Username Registration (while logged out)
     response = register('tester', 'password123')
     assert_equal 200, response.status # Should re-render form, not redirect
-    refute last_response.redirect?, "Duplicate registration should not redirect"
+    # FIX: Use assert_not instead of refute
+    assert_not last_response.redirect?, "Duplicate registration should not redirect"
     # Check it's the registration page showing the error
     assert_includes response.body, '<form action="/api/register"'
     assert_includes response.body, 'The username is already taken'
@@ -145,7 +146,8 @@ class WhoKnowsTest < Minitest::Test
     # 4. Attempt Duplicate Email Registration (while logged out)
     response = register('anotheruser', 'password123', nil, 'tester@example.com') # Use existing email
     assert_equal 200, response.status # Should re-render form
-    refute last_response.redirect?, "Duplicate email registration should not redirect"
+    # FIX: Use assert_not instead of refute
+    assert_not last_response.redirect?, "Duplicate email registration should not redirect"
     assert_includes response.body, '<form action="/api/register"'
     assert_includes response.body, 'This email is already registered'
   end
@@ -211,7 +213,8 @@ class WhoKnowsTest < Minitest::Test
     # 4. Login with wrong password
     response = login('testlogin', 'wrongpassword')
     assert_equal 200, response.status # Re-renders login form
-    refute last_response.redirect?, "Login with wrong password should not redirect"
+    # FIX: Use assert_not instead of refute
+    assert_not last_response.redirect?, "Login with wrong password should not redirect"
     # Check it's the login page showing the error
     assert_includes response.body, '<form action="/api/login"'
     assert_includes response.body, 'Invalid username or password'
@@ -219,7 +222,8 @@ class WhoKnowsTest < Minitest::Test
     # 5. Login with non-existent username
     response = login('nosuchuser', 'password')
     assert_equal 200, response.status # Re-renders login form
-    refute last_response.redirect?, "Login with non-existent user should not redirect"
+    # FIX: Use assert_not instead of refute
+    assert_not last_response.redirect?, "Login with non-existent user should not redirect"
     assert_includes response.body, '<form action="/api/login"'
     assert_includes response.body, 'Invalid username or password'
   end
