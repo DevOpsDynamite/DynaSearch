@@ -7,10 +7,8 @@ name = "ruby"
 enabled = true
 
   [analyzers.meta]
-  runtime_version = "3.4.2" 
+  runtime_version = "3.4.2"
 
-  
-  # Disable the rule preferring assert_not over refute
   Minitest/RefuteInsteadOfAssertNot:
     Enabled: false
 
@@ -25,7 +23,5 @@ enabled = true
   ]
 
 # Example: Excluding a specific check if needed (find check codes on DeepSource docs)
-# This is an alternative if the rubocop_config method doesn't work
-# You would need to find the specific DeepSource ID for the rule (e.g., "RB-M1016" or similar)
 # [analyzers.rules]
-# ruby = { skip_checks = ["REPLACE_WITH_DEEPSOURCE_RULE_ID"] }
+# ruby = { skip_checks = ["RUBY-W1001"] }
