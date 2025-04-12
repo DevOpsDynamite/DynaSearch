@@ -109,4 +109,4 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 # Use exec form to run the Sinatra app in production
 # This command is passed as arguments ("$@") to the entrypoint script,
 # which then executes it as 'appuser' via gosu.
-CMD ["bundle", "exec", "ruby", "app.rb", "-o", "0.0.0.0", "-p", "4568"]
+CMD ["bundle", "exec", "rackup", "--host", "0.0.0.0", "--port", "4568", "--env", "production"]
