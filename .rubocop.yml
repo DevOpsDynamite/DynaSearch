@@ -1,20 +1,26 @@
 # .rubocop.yml
+# This file configures RuboCop, the Ruby static code analyzer.
+# DeepSource typically respects rules configured here.
 
-# Inherit defaults or other configs if needed
-# inherit_from: .rubocop_todo.yml
-
+# Global settings for all cops
 AllCops:
-  # Consider setting your target Ruby version
-  # TargetRubyVersion: 3.4
-  NewCops: enable # Or 'pending' or 'disable' based on your preference
+  # Enable newer cops included in the RuboCop version being used
+  NewCops: enable
+  # Exclude common directories from analysis
   Exclude:
-    - 'vendor/**/*'
-    - 'db/schema.rb' 
+    - 'vendor/**/*'      # Ignore third-party code managed by Bundler
+    - 'db/schema.rb'   # Often excluded as it's auto-generated
+    - 'bin/*'          # Standard directory for executables/setup scripts
+    - 'node_modules/**/*' # If using Node.js dependencies
 
-# Disable the specific Minitest rule causing the warning
+# --- Rule-Specific Configuration ---
+
+# Disable the rule that prefers 'assert_not' over 'refute'.
+# We need 'refute' for compatibility with the current Minitest environment.
 Minitest/RefuteInsteadOfAssertNot:
   Enabled: false
 
-# You could potentially configure the other rules here too if desired
-# Style/GuardClause:
-#  Enabled: true
+# Add any other specific RuboCop configurations below as needed
+# Example:
+# Style/StringLiterals:
+#   EnforcedStyle: double_quotes
