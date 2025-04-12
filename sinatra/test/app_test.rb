@@ -138,7 +138,10 @@ class WhoKnowsTest < Minitest::Test
     response = register('tester', 'password123')
     assert_equal 200, response.status # Should re-render form, not redirect
     # Use refute (compatible) instead of assert_not
+    # FIX: Disable rule locally using inline comment
+    # rubocop:disable Minitest/RefuteInsteadOfAssertNot
     refute last_response.redirect?, "Duplicate registration should not redirect"
+    # rubocop:enable Minitest/RefuteInsteadOfAssertNot
     # Check it's the registration page showing the error
     assert_includes response.body, '<form action="/api/register"'
     assert_includes response.body, 'The username is already taken'
@@ -147,7 +150,10 @@ class WhoKnowsTest < Minitest::Test
     response = register('anotheruser', 'password123', nil, 'tester@example.com') # Use existing email
     assert_equal 200, response.status # Should re-render form
     # Use refute (compatible) instead of assert_not
+    # FIX: Disable rule locally using inline comment
+    # rubocop:disable Minitest/RefuteInsteadOfAssertNot
     refute last_response.redirect?, "Duplicate email registration should not redirect"
+    # rubocop:enable Minitest/RefuteInsteadOfAssertNot
     assert_includes response.body, '<form action="/api/register"'
     assert_includes response.body, 'This email is already registered'
   end
@@ -214,7 +220,10 @@ class WhoKnowsTest < Minitest::Test
     response = login('testlogin', 'wrongpassword')
     assert_equal 200, response.status # Re-renders login form
     # Use refute (compatible) instead of assert_not
+    # FIX: Disable rule locally using inline comment
+    # rubocop:disable Minitest/RefuteInsteadOfAssertNot
     refute last_response.redirect?, "Login with wrong password should not redirect"
+    # rubocop:enable Minitest/RefuteInsteadOfAssertNot
     # Check it's the login page showing the error
     assert_includes response.body, '<form action="/api/login"'
     assert_includes response.body, 'Invalid username or password'
@@ -223,7 +232,10 @@ class WhoKnowsTest < Minitest::Test
     response = login('nosuchuser', 'password')
     assert_equal 200, response.status # Re-renders login form
     # Use refute (compatible) instead of assert_not
+    # FIX: Disable rule locally using inline comment
+    # rubocop:disable Minitest/RefuteInsteadOfAssertNot
     refute last_response.redirect?, "Login with non-existent user should not redirect"
+    # rubocop:enable Minitest/RefuteInsteadOfAssertNot
     assert_includes response.body, '<form action="/api/login"'
     assert_includes response.body, 'Invalid username or password'
   end
