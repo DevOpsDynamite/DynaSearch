@@ -1,0 +1,20 @@
+# .rubocop.yml
+
+# Inherit defaults or other configs if needed
+# inherit_from: .rubocop_todo.yml
+
+AllCops:
+  # Consider setting your target Ruby version
+  # TargetRubyVersion: 3.4
+  NewCops: enable # Or 'pending' or 'disable' based on your preference
+  Exclude:
+    - 'vendor/**/*'
+    - 'db/schema.rb' 
+
+# Disable the specific Minitest rule causing the warning
+Minitest/RefuteInsteadOfAssertNot:
+  Enabled: false
+
+# You could potentially configure the other rules here too if desired
+# Style/GuardClause:
+#  Enabled: true
