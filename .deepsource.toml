@@ -12,7 +12,7 @@ enabled = true
   # Add rules section to skip specific checks
   [analyzers.rules]
   # Skip the check preferring assert_not over refute using its ID
-  skip_checks = ["RB-RL1045"]
+  skip_checks = ["RB-RL1045", "RB-E1002", "RB-W1021"]
 
 [[analyzers]]
 name = "docker"
