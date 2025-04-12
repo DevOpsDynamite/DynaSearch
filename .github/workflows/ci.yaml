@@ -44,3 +44,24 @@ jobs:
       - name: Run RuboCop (Code Linter)
         working-directory: sinatra
         run: bundle exec rubocop || true  # Allow non-critical failures
+      
+      - name: Install Hadolint
+        run: |
+          wget -O hadolint "https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64"
+          chmod +x hadolint
+          sudo mv hadolint /usr/local/bin/hadolint
+
+      # Verify Hadolint installation
+      - name: Verify Hadolint installation
+        run: |
+          hadolint --version
+
+      # Lint Dockerfile.dev
+      - name: Lint Dockerfile.dev
+        run: |
+          hadolint sinatra/Dockerfile.dev
+
+      # Lint Dockerfile.prod
+      - name: Lint Dockerfile.prod
+        run: |
+          hadolint sinatra/Dockerfile.prod

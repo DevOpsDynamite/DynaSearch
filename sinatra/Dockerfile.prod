@@ -87,7 +87,7 @@ COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Copy the entrypoint script into the image
 COPY docker-entrypoint.sh /usr/local/bin/
-# Change ownership of app/gems *before* entrypoint runs, make entrypoint executable
+
 RUN chown -R appuser:appuser /app /usr/local/bundle && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
@@ -109,4 +109,4 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 # Use exec form to run the Sinatra app in production
 # This command is passed as arguments ("$@") to the entrypoint script,
 # which then executes it as 'appuser' via gosu.
-CMD ["bundle", "exec", "ruby", "app.rb", "-o", "0.0.0.0", "-p", "4568"]
+CMD ["bundle", "exec", "rackup", "--host", "0.0.0.0", "--port", "4568", "--env", "production"]
