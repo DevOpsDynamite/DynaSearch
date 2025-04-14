@@ -10,9 +10,14 @@ get '/' do
   
     # Initialize results array
     @search_results = []
-  
+   
+    #  Log the search query here 
+
     # Use present? (requires ActiveSupport) to check for nil, empty, or whitespace-only strings
     if q.present?
+
+      settings.logger.info "User searched (Web): term='#{q}', lang='#{language}'"
+
       # Use squish to normalize whitespace in the SQL query string
       sql = <<-SQL.squish
         SELECT p.*
