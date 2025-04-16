@@ -47,17 +47,17 @@ jobs:
       
       
 
-      - name: Lint Dockerfiles with Hadolint
+      - name: Lint Dockerfiles for development with Hadolint
         uses: hadolint/hadolint-action@v3.1.0 # Or check for the latest version
         with:
           dockerfile:
             sinatra/Dockerfile.dev
 
 
-      - name: Lint Dockerfiles with Hadolint
+      - name: Lint Dockerfiles for production with Hadolint
         uses: hadolint/hadolint-action@v3.1.0 # Or check for the latest version
         with:
           dockerfile:
-            sinatra/Dockerfile.dev
+            sinatra/Dockerfile.prod
 
 
