@@ -22,13 +22,6 @@ jobs:
           ruby-version: 3.4.2
           bundler-cache: true # Cache based on Gemfile.lock in root or specify working-directory
 
-      # You might need to specify the working-directory for bundler-cache if Gemfile.lock is in ./sinatra
-      # - name: Set up Ruby
-      #   uses: ruby/setup-ruby@v1
-      #   with:
-      #     ruby-version: 3.4.2
-      #     bundler-cache: true
-      #     working-directory: ./sinatra # Ensures cache key is based on sinatra/Gemfile.lock
 
       - name: Install system dependencies (for testing)
         run: |
@@ -77,7 +70,7 @@ jobs:
 
       - name: Run RuboCop
         working-directory: sinatra
-        run: bundle exec rubocop || true # Consider removing || true
+        run: bundle exec rubocop || true 
 
   # Job 3: Lint Dockerfiles
   lint-docker:
