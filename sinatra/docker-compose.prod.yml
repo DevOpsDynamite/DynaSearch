@@ -5,6 +5,7 @@ services:
       - .env
     volumes:
       - sinatra_data:/app/data
+      - sinatra_logs:/app/log
     restart: unless-stopped
 
   nginx:
@@ -33,3 +34,4 @@ volumes:
   sinatra_data:
   certbot_certs:
   certbot_www:
+  sinatra_logs:
