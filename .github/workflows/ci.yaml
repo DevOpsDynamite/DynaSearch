@@ -5,12 +5,13 @@ on:
     branches:
       - main
       - dev
-  workflow_dispatch:  # Allows manual triggering from GitHub UI
+  workflow_dispatch:
 
 jobs:
+  # Job 1: Run Ruby Tests
   test:
+    name: Ruby Tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,46 +19,81 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4.2  
-          bundler-cache: true
+          ruby-version: 3.4.2
+          bundler-cache: true # Cache based on Gemfile.lock in root or specify working-directory
 
-      - name: Install dependencies
-        working-directory: sinatra  # Ensure we're inside the sinatra folder
+      # You might need to specify the working-directory for bundler-cache if Gemfile.lock is in ./sinatra
+      # - name: Set up Ruby
+      #   uses: ruby/setup-ruby@v1
+      #   with:
+      #     ruby-version: 3.4.2
+      #     bundler-cache: true
+      #     working-directory: ./sinatra # Ensures cache key is based on sinatra/Gemfile.lock
+
+      - name: Install system dependencies (for testing)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3 libsqlite3-dev # Needed for test DB
+
+      - name: Install Ruby dependencies
+        working-directory: sinatra
         run: bundle install
 
       - name: Setup test database
-        working-directory: sinatra  # Ensure DB setup runs in the correct directory
+        working-directory: sinatra
         run: |
-          touch test/test_whoknows.db  # Ensure test DB file exists
-          sqlite3 test/test_whoknows.db < schema.sql  # Load schema
+          touch test/test_whoknows.db
+          sqlite3 test/test_whoknows.db < schema.sql
 
       - name: Run Minitest
-        working-directory: sinatra  # Run tests from the correct directory
+        working-directory: sinatra
         env:
-          RACK_ENV: test  # Ensure the app runs in test mode
+          RACK_ENV: test
         run: bundle exec ruby -Itest test/app_test.rb
+
+  # Job 2: Lint Ruby Code
+  lint-ruby:
+    name: RuboCop Linting
+    runs-on: ubuntu-latest
+    needs: [] # Runs in parallel with 'test'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.2
+          bundler-cache: true
+        # working-directory: ./sinatra # Add if Gemfile.lock is in ./sinatra
+
+      - name: Install Ruby dependencies (for RuboCop)
+        working-directory: sinatra
+        run: bundle install
 
       - name: Auto-correct RuboCop issues
         working-directory: sinatra
-        run: bundle exec rubocop -A || true  # Ensure CI doesn't fail on auto-fixes
+        run: bundle exec rubocop -A || true
 
-      - name: Run RuboCop (Code Linter)
+      - name: Run RuboCop
         working-directory: sinatra
-        run: bundle exec rubocop || true  # Allow non-critical failures
-      
-      
+        run: bundle exec rubocop # Consider removing || true
 
-      - name: Lint Dockerfiles for development with Hadolint
-        uses: hadolint/hadolint-action@v3.1.0 # Or check for the latest version
+  # Job 3: Lint Dockerfiles
+  lint-docker:
+    name: Dockerfile Linting
+    runs-on: ubuntu-latest
+    needs: [] # Runs in parallel with 'test' and 'lint-ruby'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile.dev with Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile:
-            sinatra/Dockerfile.dev
+          dockerfile: sinatra/Dockerfile.dev
 
-
-      - name: Lint Dockerfiles for production with Hadolint
-        uses: hadolint/hadolint-action@v3.1.0 # Or check for the latest version
+      - name: Lint Dockerfile.prod with Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile:
-            sinatra/Dockerfile.prod
-
-
+          dockerfile: sinatra/Dockerfile.prod
