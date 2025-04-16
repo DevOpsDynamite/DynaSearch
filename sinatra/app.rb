@@ -8,7 +8,6 @@ require 'json'
 require 'sinatra/contrib' # Provides namespace, among other things
 require 'logger' # Make sure this is here
 
-
 # --- Utility Dependencies ---
 require 'dotenv/load'     # Loads environment variables from .env file
 require 'httparty'        # For making HTTP requests (weather API)
@@ -52,7 +51,7 @@ configure do
     db_connection.results_as_hash = true
     set :db, db_connection
   rescue SQLite3::Exception => e
-    $stderr.puts "FATAL: Failed to connect to database at #{DB_PATH}: #{e.message}"
+    warn "FATAL: Failed to connect to database at #{DB_PATH}: #{e.message}"
     exit(1)
   end
 
@@ -72,11 +71,7 @@ configure do
 
   # Tell Sinatra to use this logger instance. This often handles request logging too.
   set :logger, file_logger
-
-
-
-end 
-
+end
 
 ################################################################################
 # Load Helpers & Routes
@@ -114,7 +109,11 @@ error do
     { status: 'error', message: 'Internal server error.' }.to_json
   else
     @error_message = error_message
-    erb :server_error rescue "<h1>Internal Server Error</h1><p>Sorry, something went wrong.</p>"
+    begin
+      erb :server_error
+    rescue StandardError
+      '<h1>Internal Server Error</h1><p>Sorry, something went wrong.</p>'
+    end
   end
 end
 
