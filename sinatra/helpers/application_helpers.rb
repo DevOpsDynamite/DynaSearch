@@ -75,7 +75,7 @@ helpers do
   end
 
   # Retrieves forecast data, using cache if valid, otherwise fetches fresh data.
-  def get_cached_forecast
+  def cached_forecast
     cache = settings.forecast_cache
     expiration = settings.forecast_cache_expiration
 

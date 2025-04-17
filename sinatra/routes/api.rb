@@ -54,3 +54,4 @@ get '/api/weather' do
     forecast_data.to_json
   end
 end
+

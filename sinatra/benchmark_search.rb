@@ -43,7 +43,9 @@ search_terms.each do |q|
   fts5_time = Benchmark.measure do
     # Important: Use the exact FTS5 query structure you have now
     db.execute(
-      'SELECT p.title FROM pages p JOIN pages_fts f ON p.rowid = f.rowid WHERE f.pages_fts MATCH ? AND p.language = ? ORDER BY f.rank DESC',
+     'SELECT p.title FROM pages p JOIN pages_fts f ON p.rowid = f.rowid ' \
+     'WHERE f.pages_fts MATCH ? AND p.language = ? ' \
+     'ORDER BY f.rank DESC',
       [q, language]
     )
     # NOTE: We select only 'title' here just to reduce data transfer overhead during benchmark,
