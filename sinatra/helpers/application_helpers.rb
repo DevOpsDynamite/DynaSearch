@@ -43,7 +43,7 @@ helpers do
   def fetch_forecast
     api_key = ENV['WEATHERBIT_API_KEY']
     unless api_key
-      logger.error "WEATHERBIT_API_KEY is not set. Cannot fetch forecast."
+      logger.error 'WEATHERBIT_API_KEY is not set. Cannot fetch forecast.'
       return { 'error' => 'Weather service is not configured.' }
     end
 
@@ -67,10 +67,10 @@ helpers do
     rescue HTTParty::Error, Timeout::Error => e
       logger.error "Error fetching forecast from #{api_url}: #{e.class} - #{e.message}"
       { 'error' => "Failed to connect to weather service: #{e.message}" }
-    # Consider rescuing JSON::ParserError specifically if API might return invalid JSON
-    # rescue JSON::ParserError => e
-    #   logger.error "Error parsing weather API response: #{e.message}"
-    #   { 'error' => 'Failed to parse weather data.' }
+      # Consider rescuing JSON::ParserError specifically if API might return invalid JSON
+      # rescue JSON::ParserError => e
+      #   logger.error "Error parsing weather API response: #{e.message}"
+      #   { 'error' => 'Failed to parse weather data.' }
     end
   end
 
@@ -82,25 +82,24 @@ helpers do
     # Check cache validity using UTC time for comparison
     # Use Time.now.utc for consistent time zone handling
     if cache.nil? || expiration < Time.now.utc
-      logger.info "Weather forecast cache miss or expired. Fetching new data."
+      logger.info 'Weather forecast cache miss or expired. Fetching new data.'
       new_forecast = fetch_forecast
 
       # Update cache only if the fetch was successful (no 'error' key)
-      unless new_forecast.key?('error')
+      if new_forecast.key?('error')
+        # Log failure but return the error hash from fetch_forecast
+        logger.warn 'Failed to fetch new forecast data. Returning error.'
+      else
         settings.forecast_cache = new_forecast
         # Use Time.now.utc when setting the new expiration time
         settings.forecast_cache_expiration = Time.now.utc + 3600 # 1 hour cache
-        logger.info "Weather forecast cache updated."
-        return new_forecast # Return the newly fetched data
-      else
-        # Log failure but return the error hash from fetch_forecast
-        logger.warn "Failed to fetch new forecast data. Returning error."
-        return new_forecast
+        logger.info 'Weather forecast cache updated.'
       end
+      new_forecast
     else
       # Cache hit, return cached data
-      logger.debug "Weather forecast cache hit."
-      return cache
+      logger.debug 'Weather forecast cache hit.'
+      cache
     end
   end
 
@@ -123,8 +122,8 @@ helpers do
       bcrypt_hash == password
     rescue BCrypt::Errors::InvalidHash
       # Log if the stored hash is invalid
-      logger.error "Attempted to verify password against an invalid hash."
+      logger.error 'Attempted to verify password against an invalid hash.'
       false # Treat invalid hash as verification failure
     end
   end
-end # End of helpers block
+end
