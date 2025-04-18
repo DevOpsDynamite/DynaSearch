@@ -34,7 +34,8 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: 3.4
-        bundler-cache: true
+        bundler-cache: true 
+        working-directory: sinatra
 
     # - name: Start Sinatra app
     #   working-directory: sinatra
