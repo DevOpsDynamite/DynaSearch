@@ -20,4 +20,4 @@ CREATE TABLE IF NOT EXISTS pages (
     content TEXT NOT NULL
 );
 INSERT INTO pages (title, url, language, content)
-VALUES ('JavaScript','www','en','text')
+VALUES ('JavaScript Page','www','en','This page contains information about JavaScript.');
