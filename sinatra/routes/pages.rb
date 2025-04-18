@@ -50,7 +50,7 @@ get '/' do
   # GET /weather - Weather forecast page
   get '/weather' do
     # Fetch cached or fresh forecast data using helper
-    @forecast_data = get_cached_forecast
+    @forecast_data = cached_forecast
     # Render the weather view
     erb :weather
   end

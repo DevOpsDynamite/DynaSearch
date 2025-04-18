@@ -22,7 +22,8 @@ require 'active_support/core_ext/object/blank' # For present? and blank?
 set :bind, '0.0.0.0'
 set :port, 4568
 enable :sessions
-set :session_secret, ENV.fetch('SESSION_SECRET', "default_secret_for_dev_#{SecureRandom.hex(32)}") # Added default for safety
+default_secret = "default_secret_for_dev_#{SecureRandom.hex(32)}"
+set :session_secret, ENV.fetch('SESSION_SECRET', default_secret) # Added default for safety
 set :root, File.dirname(__FILE__)
 set :views, File.join(settings.root, 'views')
 
@@ -67,7 +68,8 @@ configure do
 
   log_file_path = File.join(log_dir, 'development.log')
   # Use Ruby's standard Logger class
-  file_logger = Logger.new(log_file_path, 'daily') # 'daily' rotates logs daily, you can also use 'weekly' or just the path
+  # 'daily' rotates logs daily, you can also use 'weekly' or just the path
+  file_logger = Logger.new(log_file_path, 'daily') 
   file_logger.level = Logger::INFO # Set the logging level (DEBUG, INFO, WARN, ERROR, FATAL)
 
   # Tell Sinatra to use this logger instance. This often handles request logging too.
