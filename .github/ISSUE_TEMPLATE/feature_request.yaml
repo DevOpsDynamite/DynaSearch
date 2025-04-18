@@ -1,0 +1,104 @@
+name: "Feature Request"
+description: "Suggest a new feature or enhancement using the User Story format with INVEST principles."
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please fill out the following form to help us understand your idea. This template uses the User Story format and incorporates the INVEST principle to ensure well-defined, actionable issues.
+
+  - type: input
+    id: user_type
+    attributes:
+      label: "User Type"
+      description: "Who is the user this feature is for?"
+      placeholder: "e.g. Admin, Regular User, Guest"
+    validations:
+      required: true
+
+  - type: input
+    id: goal
+    attributes:
+      label: "Goal"
+      description: "What do they want to accomplish?"
+      placeholder: "e.g. View a detailed analytics dashboard"
+    validations:
+      required: true
+
+  - type: input
+    id: reason
+    attributes:
+      label: "Reason"
+      description: "Why do they want to accomplish this?"
+      placeholder: "e.g. To make better data-driven decisions"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Acceptance Criteria
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: "Acceptance Criteria"
+      description: "Define 2-5 criteria that must be met for this feature to be considered complete."
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Tasks
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: "Tasks"
+      description: "List specific tasks required to implement the feature."
+      placeholder: |
+        - [ ] Task 1
+        - [ ] Task 2
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## INVEST Principle
+        _I: Independent, N: Negotiable, V: Valuable, E: Estimable, S: Small, T: Testable_
+
+  - type: textarea
+    id: invest
+    attributes:
+      label: "INVEST Principle Assessment"
+      description: "Reflect on how this feature aligns with each element of INVEST."
+      placeholder: |
+        - Independent: ...
+        - Negotiable: ...
+        - Valuable: ...
+        - Estimable: ...
+        - Small: ...
+        - Testable: ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Additional Context / Notes"
+      description: "Include any other relevant information or links (optional)."
+      placeholder: "e.g. Mockups, related issues, technical notes..."
+    validations:
+      required: false

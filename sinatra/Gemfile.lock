@@ -1,0 +1,170 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (8.0.2)
+      base64
+      benchmark (>= 0.3)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.3.1)
+      connection_pool (>= 2.2.5)
+      drb
+      i18n (>= 1.6, < 2)
+      logger (>= 1.4.2)
+      minitest (>= 5.1)
+      securerandom (>= 0.3)
+      tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
+    ast (2.4.2)
+    base64 (0.2.0)
+    bcrypt (3.1.20)
+    benchmark (0.4.0)
+    bigdecimal (3.1.9)
+    concurrent-ruby (1.3.5)
+    connection_pool (2.5.0)
+    csv (3.3.3)
+    dotenv (3.1.7)
+    drb (2.2.1)
+    httparty (0.23.1)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
+    i18n (1.14.7)
+      concurrent-ruby (~> 1.0)
+    json (2.10.2)
+    language_server-protocol (3.17.0.4)
+    lint_roller (1.1.0)
+    logger (1.6.6)
+    mini_mime (1.1.5)
+    mini_portile2 (2.8.8)
+    minitest (5.25.4)
+    multi_json (1.15.0)
+    multi_xml (0.7.1)
+      bigdecimal (~> 3.1)
+    mustermann (3.0.3)
+      ruby2_keywords (~> 0.0.1)
+    nio4r (2.7.4)
+    nokogiri (1.18.6)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    nokogiri (1.18.6-aarch64-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.18.6-aarch64-linux-musl)
+      racc (~> 1.4)
+    nokogiri (1.18.6-arm-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.18.6-arm-linux-musl)
+      racc (~> 1.4)
+    nokogiri (1.18.6-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.18.6-x64-mingw-ucrt)
+      racc (~> 1.4)
+    nokogiri (1.18.6-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.18.6-x86_64-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.18.6-x86_64-linux-musl)
+      racc (~> 1.4)
+    parallel (1.26.3)
+    parser (3.3.7.1)
+      ast (~> 2.4.1)
+      racc
+    puma (6.6.0)
+      nio4r (~> 2.0)
+    racc (1.8.1)
+    rack (3.1.12)
+    rack-protection (4.1.1)
+      base64 (>= 0.1.0)
+      logger (>= 1.6.0)
+      rack (>= 3.0.0, < 4)
+    rack-session (2.1.0)
+      base64 (>= 0.1.0)
+      rack (>= 3.0.0)
+    rack-test (2.2.0)
+      rack (>= 1.3)
+    rackup (2.2.1)
+      rack (>= 3)
+    rainbow (3.1.1)
+    rake (13.2.1)
+    regexp_parser (2.10.0)
+    rubocop (1.72.2)
+      json (~> 2.3)
+      language_server-protocol (~> 3.17.0.2)
+      lint_roller (~> 1.1.0)
+      parallel (~> 1.10)
+      parser (>= 3.3.0.2)
+      rainbow (>= 2.2.2, < 4.0)
+      regexp_parser (>= 2.9.3, < 3.0)
+      rubocop-ast (>= 1.38.0, < 2.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 2.4.0, < 4.0)
+    rubocop-ast (1.38.0)
+      parser (>= 3.3.1.0)
+    ruby-progressbar (1.13.0)
+    ruby2_keywords (0.0.5)
+    securerandom (0.4.1)
+    sinatra (4.1.1)
+      logger (>= 1.6.0)
+      mustermann (~> 3.0)
+      rack (>= 3.0.0, < 4)
+      rack-protection (= 4.1.1)
+      rack-session (>= 2.0.0, < 3)
+      tilt (~> 2.0)
+    sinatra-contrib (4.1.1)
+      multi_json (>= 0.0.2)
+      mustermann (~> 3.0)
+      rack-protection (= 4.1.1)
+      sinatra (= 4.1.1)
+      tilt (~> 2.0)
+    sinatra-flash (0.3.0)
+      sinatra (>= 1.0.0)
+    sqlite3 (2.6.0-aarch64-linux-gnu)
+    sqlite3 (2.6.0-aarch64-linux-musl)
+    sqlite3 (2.6.0-arm-linux-gnu)
+    sqlite3 (2.6.0-arm-linux-musl)
+    sqlite3 (2.6.0-arm64-darwin)
+    sqlite3 (2.6.0-x64-mingw-ucrt)
+    sqlite3 (2.6.0-x86-linux-gnu)
+    sqlite3 (2.6.0-x86-linux-musl)
+    sqlite3 (2.6.0-x86_64-darwin)
+    sqlite3 (2.6.0-x86_64-linux-gnu)
+    sqlite3 (2.6.0-x86_64-linux-musl)
+    tilt (2.6.0)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
+    unicode-display_width (3.1.4)
+      unicode-emoji (~> 4.0, >= 4.0.4)
+    unicode-emoji (4.0.4)
+    uri (1.0.3)
+
+PLATFORMS
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  arm-linux-gnu
+  arm-linux-musl
+  arm64-darwin
+  x64-mingw-ucrt
+  x86-linux-gnu
+  x86-linux-musl
+  x86_64-darwin
+  x86_64-linux-gnu
+  x86_64-linux-musl
+
+DEPENDENCIES
+  activesupport
+  bcrypt (~> 3.1.13)
+  dotenv
+  httparty
+  minitest
+  nokogiri
+  puma (~> 6.6)
+  rack-test
+  rackup (~> 2.2)
+  rake
+  rubocop (~> 1.72)
+  sinatra
+  sinatra-contrib
+  sinatra-flash
+  sqlite3
+
+BUNDLED WITH
+   2.6.3

@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Run Ruby Tests
+  test:
+    name: Ruby Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.2
+          bundler-cache: true # Cache based on Gemfile.lock in root or specify working-directory
+
+      - name: Install system dependencies (for testing)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3 libsqlite3-dev # Needed for test DB
+
+      - name: Install Ruby dependencies
+        working-directory: sinatra
+        run: bundle install
+
+      - name: Setup test database
+        working-directory: sinatra
+        run: |
+          touch test/test_whoknows.db
+          sqlite3 test/test_whoknows.db < schema.sql
+
+      - name: Run Minitest
+        working-directory: sinatra
+        env:
+          RACK_ENV: test
+        run: bundle exec ruby -Itest test/app_test.rb
+
+  # Job 2: Lint Ruby Code
+  lint-ruby:
+    name: RuboCop Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.2
+          bundler-cache: true
+        # working-directory: ./sinatra # Add if Gemfile.lock is in ./sinatra
+
+      - name: Install Ruby dependencies (for RuboCop)
+        working-directory: sinatra
+        run: bundle install
+
+      - name: Auto-correct RuboCop issues
+        working-directory: sinatra
+        run: bundle exec rubocop -A || true
+
+      - name: Run RuboCop
+        working-directory: sinatra
+        run: bundle exec rubocop || true
+
+  # Job 3: Lint Dockerfiles
+  lint-docker:
+    name: Dockerfile Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile.dev with Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: sinatra/Dockerfile.dev
+
+      - name: Lint Dockerfile.prod with Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: sinatra/Dockerfile.prod
