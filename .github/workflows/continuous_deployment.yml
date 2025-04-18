@@ -2,7 +2,7 @@ name: Deploy to Dev Environment
 
 on:
   workflow_run:
-    workflows: ["Continuous Delivery"] # Runs after images are created properly
+    workflows: ["Continuous Delivery"] # Runs after images are created properly 
     branches: [dev]
     types:
       - completed
@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -22,7 +23,7 @@ jobs:
 
       - name: Deploy to Azure VM
         run: | # Copy the docker-compose file and any other necessary files
-          scp -o StrictHostKeyChecking=no docker-compose.dev.yml ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/docker-compose.yml
+          scp -o StrictHostKeyChecking=no sinatra/docker-compose.dev.yml ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/docker-compose.yml
           scp -o StrictHostKeyChecking=no -r nginx ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/nginx
           
           ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }} << 'EOF'
@@ -32,4 +33,15 @@ jobs:
             docker-compose up -d
             
             docker image prune -f
+
+      - name: Debug environment
+        run: |
+          pwd
+          echo "Current directory contents:"
+          ls -la
+          echo "Checking if file exists:"
+          test -f docker-compose.dev.yml && echo "File exists" || echo "File does not exist"
+          echo "Current branch:"
+          git branch --show-current
+          
           EOF
