@@ -1,0 +1,35 @@
+name: "Security Vulnerability Report"
+description: "Report a potential security vulnerability to help us improve the security of our project."
+title: "[SECURITY] "
+labels: ["security", "vulnerability"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a security issue. Please fill out the following sections with as much detail as possible.
+  - type: input
+    id: summary
+    attributes:
+      label: "Summary"
+      description: "Provide a brief summary of the security vulnerability."
+      placeholder: "e.g. Authentication bypass in login module"
+  - type: textarea
+    id: description
+    attributes:
+      label: "Detailed Description"
+      description: "Describe the vulnerability in detail, including steps to reproduce, and what you expected versus what actually happened."
+      placeholder: "Provide the full context and details for the issue..."
+  - type: textarea
+    id: impact
+    attributes:
+      label: "Impact"
+      description: "Explain the potential impact of this vulnerability (e.g., data breach, unauthorized access, etc.)."
+      placeholder: "Describe the potential risk and consequences..."
+  - type: textarea
+    id: remediation
+    attributes:
+      label: "Suggested Remediation"
+      description: "If you have any suggestions on how to mitigate or fix the vulnerability, please describe them here. This field is optional."
+      placeholder: "Optional suggestions for fixing the issue..."
