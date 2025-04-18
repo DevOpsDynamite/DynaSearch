@@ -2,9 +2,9 @@ name: Playwright End-to-End Tests
 
 on:
   push:
-    branches: [ feature/e2e-tests, feature/e2e-debug ]
+    branches: [ dev, main ]
   pull_request:
-    branches: [ feature/e2e-tests ]
+    branches: [ dev, main ]
   workflow_dispatch:
 
 
