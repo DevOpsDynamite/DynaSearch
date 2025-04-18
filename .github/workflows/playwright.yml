@@ -65,6 +65,8 @@ jobs:
 
     - name: Run Playwright tests
       working-directory: sinatra/tests
+      env:
+        WEATHERBIT_API_KEY: ${{ secrets.WEATHERBIT_API_KEY }}
       run: npx playwright test --reporter=html
 
     - name: Upload Playwright report

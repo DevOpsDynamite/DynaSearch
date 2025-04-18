@@ -14,7 +14,7 @@ module.exports = defineConfig({
   }, 
 
   webServer: {
-    command: 'bundle exec rackup -p 4568',
+    command: 'DATABASE_PATH=./test/test_whoknows.db bundle exec rackup -p 4568',
     url: 'http://127.0.0.1:4568',
     cwd: '../',
     reuseExistingServer: !process.env.CI,
