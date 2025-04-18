@@ -1,0 +1,35 @@
+name: Deploy to Dev Environment
+
+on:
+  workflow_run:
+    workflows: ["Continuous Delivery"] # Runs after images are created properly
+    branches: [dev]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.AZURE_VM_SSH_KEY }}
+
+      - name: Deploy to Azure VM
+        run: | # Copy the docker-compose file and any other necessary files
+          scp -o StrictHostKeyChecking=no docker-compose.dev.yml ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/docker-compose.yml
+          scp -o StrictHostKeyChecking=no -r nginx ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/nginx
+          
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }} << 'EOF'
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            docker-compose pull
+            docker-compose up -d
+            
+            docker image prune -f
+          EOF
