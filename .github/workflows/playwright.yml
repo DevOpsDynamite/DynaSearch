@@ -36,20 +36,20 @@ jobs:
         ruby-version: 3.4
         bundler-cache: true
 
-    - name: Start Sinatra app
-      working-directory: sinatra
-      run: bundle exec rackup -p 4568 &
+    # - name: Start Sinatra app
+    #   working-directory: sinatra
+    #   run: bundle exec rackup -p 4568 &
 
-    - name: Wait for Sinatra to be ready
-      run: |
-        echo "Waiting for Sinatra on port 4568..."
-        for i in {1..30}; do
-          if curl -s http://localhost:4568/health >/dev/null; then
-            echo "Sinatra is up!"
-            break
-          fi
-          sleep 1
-        done
+    # - name: Wait for Sinatra to be ready
+    #   run: |
+    #     echo "Waiting for Sinatra on port 4568..."
+    #     for i in {1..30}; do
+    #       if curl -s http://localhost:4568/health >/dev/null; then
+    #         echo "Sinatra is up!"
+    #         break
+    #       fi
+    #       sleep 1
+    #     done
 
     - name: Setup Node.js
       uses: actions/setup-node@v4

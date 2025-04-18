@@ -11,7 +11,14 @@ module.exports = defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:4568',  
     trace: 'on-first-retry',
+  }, 
+
+  webServer: {
+    command: 'bundle exec rackup -p 4568',
+    url: 'http://127.0.0.1:4568',
+    reuseExistingServer: !process.env.CI,
   },
+
    /* Configure projects for major browsers */
    projects: [
     {
@@ -28,13 +35,4 @@ module.exports = defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },]
-
-  // Optional: start Sinatra for you
-  /*
-  webServer: {
-    command: 'bundle exec rackup -p 4568',
-    url: 'http://127.0.0.1:4568',
-    reuseExistingServer: !process.env.CI,
-  },
-  */
 });
