@@ -19,5 +19,5 @@ CREATE TABLE IF NOT EXISTS pages (
     last_updated TIMESTAMP,
     content TEXT NOT NULL
 );
-INSERT INTO pages (title, url, language, last_updated, content)
+INSERT INTO pages (title, url, language, content)
 VALUES ('JavaScript','www','en','text')
