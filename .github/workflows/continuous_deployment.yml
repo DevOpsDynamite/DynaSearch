@@ -2,7 +2,7 @@ name: Deploy to Dev Environment
 
 on:
   workflow_run:
-    workflows: ["Continuous Delivery"] # Runs after images are created properly
+    workflows: ["Continuous Delivery"] # Runs after images are created properly 
     branches: [dev]
     types:
       - completed
