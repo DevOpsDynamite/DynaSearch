@@ -1,7 +1,0 @@
-.git
-.github
-.vscode
-test/
-docs/
-*.db
-*.env
