@@ -1,6 +1,0 @@
-reviews:
-  review_status: false
-  auto_review:
-    base_branches:
-      - dev
-      
