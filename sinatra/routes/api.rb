@@ -42,7 +42,7 @@ get '/api/search' do
     content_type :json # Indicate JSON response
   
     # Get forecast data (potentially cached)
-    forecast_data = get_cached_forecast
+    forecast_data = cached_forecast
   
     # Check if the forecast data contains an error from the helper
     if forecast_data.key?('error')
