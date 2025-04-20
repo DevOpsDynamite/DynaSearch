@@ -39,6 +39,7 @@ jobs:
             echo "SESSION_SECRET=$SESSION_SECRET" > .env
 
             cd ~
+
             docker-compose pull
             docker-compose up -d
 
