@@ -115,7 +115,6 @@ We’ve already configured Playwright in `sinatra/tests`. To run the full E2E su
      `npx playwright test --headed`  
    - To launch the interactive Playwright UI:  
      `npx playwright test --ui`
-    ```
 
 ### End-to-End Test Report
 
