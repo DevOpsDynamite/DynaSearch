@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Create a default user
 INSERT INTO users (username, email, password) 
-    VALUES ('test', 'keamonk1@stud.kea.dk', '123');
+    VALUES ('test', 'keamonk1@stud.kea.dk', '5f4dcc3b5aa765d61d8327deb882cf99');
 
 
 CREATE TABLE IF NOT EXISTS pages (
