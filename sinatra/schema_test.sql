@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   password TEXT NOT NULL
 );
 
--- Create a default user, The password is 'password' (MD5 hashed)
+-- Create a default user
 INSERT INTO users (username, email, password) 
     VALUES ('test', 'keamonk1@stud.kea.dk', '123');
 
@@ -20,4 +20,4 @@ CREATE TABLE IF NOT EXISTS pages (
     content TEXT NOT NULL
 );
 INSERT INTO pages (title, url, language, content)
-VALUES ('JavaScript Page','www','en','This page contains information about JavaScript.');
+VALUES ('JavaScript','www','en','text')
