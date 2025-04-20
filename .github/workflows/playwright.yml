@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 
-# permissions:
-#   contents: write  # Needed for deploying to GitHub Pages
+permissions:
+  contents: write  # Needed for deploying to GitHub Pages
 
 jobs:
   e2e:
@@ -37,21 +37,6 @@ jobs:
         bundler-cache: true 
         working-directory: sinatra
 
-    # - name: Start Sinatra app
-    #   working-directory: sinatra
-    #   run: bundle exec rackup -p 4568 &
-
-    # - name: Wait for Sinatra to be ready
-    #   run: |
-    #     echo "Waiting for Sinatra on port 4568..."
-    #     for i in {1..30}; do
-    #       if curl -s http://localhost:4568/health >/dev/null; then
-    #         echo "Sinatra is up!"
-    #         break
-    #       fi
-    #       sleep 1
-    #     done
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -77,10 +62,10 @@ jobs:
         path: sinatra/tests/playwright-report
         retention-days: 7
 
-    # - name: Deploy report to GitHub Pages
-    #   if: always()
-    #   uses: peaceiris/actions-gh-pages@v3
-    #   with:
-    #     # # github_token: ${{ secrets.GITHUB_TOKEN }}
-    #     # publish_dir: sinatra/tests/playwright-report
-    #     # publish_branch: gh-pages
+    - name: Deploy report to GitHub Pages
+      if: always()
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: sinatra/tests/playwright-report
+        publish_branch: gh-pages
