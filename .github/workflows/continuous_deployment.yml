@@ -22,6 +22,8 @@ jobs:
           ssh-private-key: ${{ secrets.AZURE_VM_SSH_KEY }}
 
       - name: Deploy to Azure VM
+        env:
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
         run: | # Copy the docker-compose file and any other necessary files
           scp -o StrictHostKeyChecking=no sinatra/docker-compose.dev.yml ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/docker-compose.yml
           scp -o StrictHostKeyChecking=no -r sinatra/nginx ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/nginx
