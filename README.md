@@ -88,6 +88,39 @@ Bash
 
 `bundle exec ruby -Itest test/app_test.rb`
 
+
+### Running End-to-End Tests (Playwright)
+
+We’ve already configured Playwright in `sinatra/tests`. To run the full E2E suite:
+
+1. **Start the Sinatra app** in one terminal:
+   ```bash
+   cd sinatra
+   bundle exec rackup -p 4568
+   ```
+
+2. **Install dependencies & run Playwright** in another terminal:
+   ```bash
+   cd sinatra/tests
+   npm install
+   npx playwright install
+   npx playwright test
+   ```
+
+3. **View the HTML report**:
+   ```bash
+   npx playwright show-report
+   ```
+   - For headed mode:  
+     `npx playwright test --headed`  
+   - To launch the interactive Playwright UI:  
+     `npx playwright test --ui`
+
+### End-to-End Test Report
+
+We publish the latest Playwright E2E test report to GitHub Pages.  
+View it here: [https://devopsdynamite.github.io/DynaSearch/](https://devopsdynamite.github.io/DynaSearch/)
+
 ### Linting / Code Style
 
 Check code style using RuboCop (if configured via `.rubocop.yml`):

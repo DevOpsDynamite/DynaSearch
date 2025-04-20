@@ -27,7 +27,7 @@ test.describe('Login Page', () => {
     await page.click('input[type="submit"]');
 
     // Verify redirect to home
-    expect(page.url()).toBe('/');
+    expect(page.url()).toBe('http://127.0.0.1:4568/');
     await expect(page.getByText('You were successfully logged in.')).toBeVisible();
   });
 });
