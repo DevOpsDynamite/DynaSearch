@@ -148,9 +148,22 @@ APP_REQUEST_DURATION_SECONDS = PROMETHEUS.histogram(
 
 require 'prometheus/middleware/exporter'
 
-use Prometheus::Middleware::Exporter
+# use Prometheus::Middleware::Exporter
 
-# sinatra/app.rb
+
+# Add this explicit route:
+get '/metrics' do
+  begin
+    content_type Prometheus::Client::Formats::Text::CONTENT_TYPE
+    # Correct way to format the entire registry:
+    Prometheus::Client::Formats::Text.marshal(PROMETHEUS)
+  rescue => e
+    logger.error "Error generating /metrics: #{e.message} Backtrace: #{e.backtrace.join("\n")}"
+    status 500
+    "Error generating metrics"
+  end
+end
+
 
 before do
   # Store request start time
