@@ -151,11 +151,12 @@ require 'prometheus/middleware/exporter'
 # use Prometheus::Middleware::Exporter
 
 
-# Add this explicit route:
+
 get '/metrics' do
   begin
-    content_type Prometheus::Client::Formats::Text::CONTENT_TYPE
-    # Correct way to format the entire registry:
+    # Set the Content-Type header manually with semicolons
+    headers['Content-Type'] = 'text/plain; version=0.0.4; charset=utf-8'
+    # Format the registry using the correct marshaller
     Prometheus::Client::Formats::Text.marshal(PROMETHEUS)
   rescue => e
     logger.error "Error generating /metrics: #{e.message} Backtrace: #{e.backtrace.join("\n")}"
