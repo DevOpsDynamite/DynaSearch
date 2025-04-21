@@ -30,12 +30,15 @@ jobs:
       - name: Set image tags based on branch
         id: set-tags
         run: |
-          if [ "${{ env.BRANCH_NAME }}" == "main" ]; then
-            echo "TAGS=ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:latest,ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:${{ github.sha }}" >> $GITHUB_OUTPUT
-          elif [ "${{ env.BRANCH_NAME }}" == "dev" ]; then
-            echo "TAGS=ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:dev-latest,ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:dev-${{ github.sha }}" >> $GITHUB_OUTPUT
+          # replace every “/” with “-” and force lower‑case just to be safe
+          SAFE_BRANCH=$(echo "${{ env.BRANCH_NAME }}" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+      
+          if [ "$SAFE_BRANCH" = "main" ]; then
+            echo "TAGS=ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:latest,ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          elif [ "$SAFE_BRANCH" = "dev" ]; then
+            echo "TAGS=ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:dev-latest,ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:dev-${{ github.sha }}" >> "$GITHUB_OUTPUT"
           else
-            echo "TAGS=ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:${{ env.BRANCH_NAME }}-latest,ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:${{ env.BRANCH_NAME }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "TAGS=ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:${SAFE_BRANCH}-latest,ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:${SAFE_BRANCH}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
       
       - name: Build and push Docker image
