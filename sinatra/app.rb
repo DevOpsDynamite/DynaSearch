@@ -153,6 +153,7 @@ require 'prometheus/middleware/exporter'
 
 
 get '/metrics' do
+@skip_metrics = true
   begin
     # Set the Content-Type header manually with semicolons
     headers['Content-Type'] = 'text/plain; version=0.0.4; charset=utf-8'
@@ -186,6 +187,7 @@ before do
 end
 
 after do
+  return if @skip_metrics
   # --- Increment Counters & Observe Histograms ---
   APP_HTTP_RESPONSES_TOTAL.increment
 
