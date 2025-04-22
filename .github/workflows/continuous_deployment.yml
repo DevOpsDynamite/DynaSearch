@@ -16,10 +16,10 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.AZURE_VM_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.AZURE_VM_SSH_KEY }}" > ~/.ssh/ssh_key
+          chmod 600 ~/.ssh/ssh_key
           eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
+          ssh-add ~/.ssh/ssh_key
           ssh-keyscan -H ${{ secrets.AZURE_VM_IP }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
