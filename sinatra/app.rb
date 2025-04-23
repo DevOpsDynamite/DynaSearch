@@ -37,13 +37,17 @@ register Sinatra::Flash
 # Database Configuration & Setup / Logging Configuration
 ################################################################################
 
-DB_PATH = if ENV['RACK_ENV'] == 'test'
-            File.join(__dir__, 'test', 'test_whoknows.db')
-          elsif ENV['DATABASE_PATH']
-            ENV['DATABASE_PATH']
-          else
-            File.join(__dir__, 'whoknows.db')
-          end
+DATABASE_URL = if ENV['RACK_ENV'] == 'test'
+  # Keep using SQLite for tests for now, or set up a test Postgres DB
+  "sqlite://#{File.join(__dir__, 'test', 'test_whoknows.db')}"
+elsif ENV['DATABASE_URL']
+  ENV['DATABASE_URL'] # Use DATABASE_URL for Supabase
+else
+  # Fallback for local dev *if* you still want SQLite locally sometimes
+  # Or raise an error if DATABASE_URL is required outside of tests
+  "sqlite://#{File.join(__dir__, 'whoknows.db')}"
+  # Or: raise "DATABASE_URL environment variable is not set!"
+end
 
 configure do
   # --- Database Setup ---
