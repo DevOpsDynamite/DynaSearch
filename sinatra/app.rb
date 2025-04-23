@@ -3,7 +3,7 @@
 # --- Core Dependencies ---
 require 'sinatra'
 require 'sinatra/flash'
-require 'sqlite3'
+# require 'sqlite3'
 require 'json'
 require 'sinatra/contrib' # Provides namespace, among other things
 require 'logger'
@@ -52,9 +52,9 @@ end
 
 configure do
   # --- Database Setup ---
-  if ENV['RACK_ENV'] != 'test' && !File.exist?(DB_PATH)
-    warn "WARN: Database not found at #{DB_PATH}. Application might not function correctly."
-  end
+  # if ENV['RACK_ENV'] != 'test' && !File.exist?(DB_PATH)
+  #   warn "WARN: Database not found at #{DB_PATH}. Application might not function correctly."
+  # end
 
   begin
     # Use the DATABASE_URL determined earlier
