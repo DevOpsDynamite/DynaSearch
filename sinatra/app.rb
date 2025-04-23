@@ -8,6 +8,7 @@ require 'json'
 require 'sinatra/contrib' # Provides namespace, among other things
 require 'logger'
 require 'prometheus/client'
+require 'pg'
 
 
 # --- Utility Dependencies ---
@@ -41,12 +42,12 @@ DATABASE_URL = if ENV['RACK_ENV'] == 'test'
   # Keep using SQLite for tests for now, or set up a test Postgres DB
   "sqlite://#{File.join(__dir__, 'test', 'test_whoknows.db')}"
 elsif ENV['DATABASE_URL']
-  ENV['DATABASE_URL'] # Use DATABASE_URL for Supabase
-else
-  # Fallback for local dev *if* you still want SQLite locally sometimes
-  # Or raise an error if DATABASE_URL is required outside of tests
-  "sqlite://#{File.join(__dir__, 'whoknows.db')}"
-  # Or: raise "DATABASE_URL environment variable is not set!"
+  ENV['DATABASE_URL'] 
+# else
+#   # Fallback for local dev *if* you still want SQLite locally sometimes
+#   # Or raise an error if DATABASE_URL is required outside of tests
+#   "sqlite://#{File.join(__dir__, 'whoknows.db')}"
+#   # Or: raise "DATABASE_URL environment variable is not set!"
 end
 
 configure do
@@ -56,12 +57,24 @@ configure do
   end
 
   begin
-    db_connection = SQLite3::Database.new(DB_PATH)
-    db_connection.results_as_hash = true
+    # Use the DATABASE_URL determined earlier
+    db_connection = PG::Connection.new(DATABASE_URL)
+ 
+    # Optional: Set notice processor to log PostgreSQL notices
+    db_connection.set_notice_processor { |message| settings.logger.warn "PostgreSQL Notice: #{message}" }
+ 
+    # Set the connection object for the app
     set :db, db_connection
-  rescue SQLite3::Exception => e
-    warn "FATAL: Failed to connect to database at #{DB_PATH}: #{e.message}"
+  rescue PG::Error => e # Catch PostgreSQL specific errors
+    settings.logger.fatal "FATAL: Failed to connect to PostgreSQL database: #{e.message}"
+    # Optional: Log connection string details without password for debugging
+    settings.logger.fatal "Connection attempt made using DATABASE_URL (password redacted)."
     exit(1)
+  end
+ 
+  # Add a disconnect hook for clean shutdown
+  at_exit do
+    settings.db&.close if settings.db.is_a?(PG::Connection) && !settings.db.finished?
   end
 
   # --- Weather Cache Setup ---

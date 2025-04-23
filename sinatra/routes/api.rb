@@ -12,16 +12,19 @@ get '/api/search' do
 
   # Use present? (requires ActiveSupport) to check query presence
   if q.present?
+    # Use ILIKE for case-insensitive search, $1, $2 placeholders
+    # Removed FTS5 join and ORDER BY rank
     sql = <<-SQL.squish
-        SELECT p.*
-        FROM pages p
-        JOIN pages_fts f ON p.rowid = f.rowid
-        WHERE f.pages_fts MATCH ? AND p.language = ?
-        ORDER BY f.rank DESC;
+        SELECT *
+        FROM pages
+        WHERE content ILIKE $1 AND language::text = $2;
     SQL
     begin
-      search_results = db.execute(sql, [q, language])
-    rescue SQLite3::Exception => e
+      # Use exec_params, add wildcards
+      search_result_obj = db.exec_params(sql, ["%#{q}%", language])
+      # Convert PG::Result to array of hashes
+      search_results = search_result_obj.to_a
+    rescue PG::Error => e # Catch PostgreSQL errors
       logger.error "API Search Error: #{e.message}"
       # Halt with a 500 error and JSON response for API consumers
       halt 500, { status: 'error', message: 'Database error occurred during search.' }.to_json

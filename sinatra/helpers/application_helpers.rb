@@ -19,7 +19,10 @@ helpers do
     return @current_user = nil unless user_id
 
     begin
-      user = db.get_first_row('SELECT * FROM users WHERE id = ?', user_id)
+      # Use exec_params with $1 placeholder, .first to get the single row hash
+      user_result = db.exec_params('SELECT * FROM users WHERE id = $1', [user_id])
+      user = user_result.first # Get the hash or nil
+
       if user.nil?
         # Clear invalid session ID if user not found
         session.delete(:user_id)
@@ -28,7 +31,7 @@ helpers do
         # Store valid user hash
         @current_user = user
       end
-    rescue SQLite3::Exception => e
+    rescue PG::Error => e # Catch PostgreSQL errors
       # Log DB error and ensure user is not considered logged in
       logger.error "Database error fetching current user (ID: #{user_id}): #{e.message}"
       @current_user = nil
@@ -38,7 +41,7 @@ helpers do
   end
 
   # --- Weather Forecast Helpers ---
-
+  # (No database changes needed in this section)
   # Fetches forecast data from the Weatherbit API.
   def fetch_forecast
     api_key = ENV['WEATHERBIT_API_KEY']
@@ -67,10 +70,6 @@ helpers do
     rescue HTTParty::Error, Timeout::Error => e
       logger.error "Error fetching forecast from #{api_url}: #{e.class} - #{e.message}"
       { 'error' => "Failed to connect to weather service: #{e.message}" }
-      # Consider rescuing JSON::ParserError specifically if API might return invalid JSON
-      # rescue JSON::ParserError => e
-      #   logger.error "Error parsing weather API response: #{e.message}"
-      #   { 'error' => 'Failed to parse weather data.' }
     end
   end
 
@@ -79,32 +78,26 @@ helpers do
     cache = settings.forecast_cache
     expiration = settings.forecast_cache_expiration
 
-    # Check cache validity using UTC time for comparison
-    # Use Time.now.utc for consistent time zone handling
     if cache.nil? || expiration < Time.now.utc
       logger.info 'Weather forecast cache miss or expired. Fetching new data.'
       new_forecast = fetch_forecast
 
-      # Update cache only if the fetch was successful (no 'error' key)
       if new_forecast.key?('error')
-        # Log failure but return the error hash from fetch_forecast
         logger.warn 'Failed to fetch new forecast data. Returning error.'
       else
         settings.forecast_cache = new_forecast
-        # Use Time.now.utc when setting the new expiration time
         settings.forecast_cache_expiration = Time.now.utc + 3600 # 1 hour cache
         logger.info 'Weather forecast cache updated.'
       end
       new_forecast
     else
-      # Cache hit, return cached data
       logger.debug 'Weather forecast cache hit.'
       cache
     end
   end
 
   # --- Security Helpers ---
-
+  # (No database changes needed in this section)
   # Hashes a password using BCrypt.
   def hash_password(password)
     BCrypt::Password.create(password)
@@ -112,18 +105,14 @@ helpers do
 
   # Verifies a given password against a stored BCrypt hash.
   def verify_password(stored_hash, password)
-    # Use blank? (requires ActiveSupport) to check for nil or empty string
     return false if stored_hash.blank?
 
     begin
-      # Create BCrypt object from the stored hash
       bcrypt_hash = BCrypt::Password.new(stored_hash)
-      # Use BCrypt's comparison method
       bcrypt_hash == password
     rescue BCrypt::Errors::InvalidHash
-      # Log if the stored hash is invalid
       logger.error 'Attempted to verify password against an invalid hash.'
-      false # Treat invalid hash as verification failure
+      false
     end
   end
 end

@@ -17,8 +17,10 @@ post '/api/login' do
   else
     # Fetch user from database only if input is present
     begin
-      user = db.get_first_row('SELECT * FROM users WHERE username = ?', username)
-    rescue SQLite3::Exception => e
+      # Use exec_params with $1 placeholder, .first to get the single row hash
+      user_result = db.exec_params('SELECT * FROM users WHERE username = $1', [username])
+      user = user_result.first # Get the first (and only) row if it exists
+    rescue PG::Error => e # Catch PostgreSQL errors
       logger.error "Database error during login for user '#{username}': #{e.message}"
       error = 'An internal error occurred. Please try again.'
     end
@@ -27,9 +29,9 @@ post '/api/login' do
   # Proceed with password verification only if no prior errors occurred
   if error.nil?
     # Check if user exists and password is correct
-    if user && verify_password(user['password'], password)
+    if user && verify_password(user['password'], password) # user is now a hash
       # Login successful: Set session and redirect
-      session[:user_id] = user['id']
+      session[:user_id] = user['id'] # Access 'id' key from the hash
       flash[:notice] = 'You were successfully logged in.'
       redirect '/' # Redirect to home page after successful login
     else
@@ -79,15 +81,16 @@ post '/api/register' do
   else
     # --- Check for existing user/email (only if basic validation passes) ---
     begin
-      existing_user = db.get_first_row('SELECT id FROM users WHERE username = ?', username)
-      existing_email = db.get_first_row('SELECT id FROM users WHERE email = ?', email)
+      # Use exec_params with $1 placeholder, .ntuples checks if any rows were returned
+      existing_user_result = db.exec_params('SELECT 1 FROM users WHERE username = $1 LIMIT 1', [username])
+      existing_email_result = db.exec_params('SELECT 1 FROM users WHERE email = $1 LIMIT 1', [email])
 
-      if existing_user
+      if existing_user_result.ntuples.positive?
         error = 'The username is already taken'
-      elsif existing_email
+      elsif existing_email_result.ntuples.positive?
         error = 'This email is already registered'
       end
-    rescue SQLite3::Exception => e
+    rescue PG::Error => e # Catch PostgreSQL errors
       logger.error "Database error during registration check for '#{username}'/'#{email}': #{e.message}"
       error = 'An internal error occurred during registration check. Please try again.'
     end
@@ -106,16 +109,18 @@ post '/api/register' do
     # --- Create User (only if no errors) ---
     begin
       hashed_password = hash_password(password) # Hash the valid password
-      db.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-                 [username, email, hashed_password])
+      # Use exec_params with $1, $2, $3 placeholders
+      # Use RETURNING id to get the new user's ID
+      insert_result = db.exec_params('INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id',
+                                     [username, email, hashed_password])
 
-      new_user_id = db.last_insert_row_id
+      new_user_id = insert_result.first['id'] # Get the id from the returned row
 
       # Log the new user in and redirect.
       session[:user_id] = new_user_id
       flash[:notice] = 'You were successfully registered and are now logged in.'
       redirect '/'
-    rescue SQLite3::Exception => e
+    rescue PG::Error => e # Catch PostgreSQL errors
       # Handle potential DB error during insertion
       logger.error "Database error during user insertion for '#{username}': #{e.message}"
       flash.now[:error] = 'An internal error occurred while creating your account. Please try again.'
