@@ -8,6 +8,7 @@ gem 'dotenv'
 gem 'httparty'
 gem 'nokogiri'
 gem 'puma', '~> 6.6'
+gem 'pg'
 gem 'prometheus-client'
 gem 'rackup', '~> 2.2'
 gem 'rake'
@@ -15,7 +16,6 @@ gem 'rubocop', '~> 1.72', require: false
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'sinatra-flash'
-gem 'sqlite3'
 
 group :test do
   gem 'minitest'
