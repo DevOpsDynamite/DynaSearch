@@ -2,6 +2,7 @@
 
 # Defines routes for standard HTML pages (non-API, non-auth actions)
 
+
 # GET / - Search page (and homepage)
 get '/' do
   # Use safe navigation (&.) and strip whitespace from query param

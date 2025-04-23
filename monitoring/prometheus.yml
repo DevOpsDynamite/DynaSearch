@@ -1,0 +1,11 @@
+# monitoring/prometheus.yml (Option B: Public Endpoint)
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'sinatra-app'
+    # Scrape the public endpoint
+    metrics_path: /metrics # Path Nginx exposes
+    scheme: https
+    static_configs:
+      - targets: ['www.dynasearch.dk'] # Domain name
