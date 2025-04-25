@@ -28,10 +28,18 @@ post '/api/login' do
   if error.nil?
     # Check if user exists and password is correct
     if user && verify_password(user['password'], password)
-      # Login successful: Set session and redirect
-      session[:user_id] = user['id']
-      flash[:notice] = 'You were successfully logged in.'
-      redirect '/' # Redirect to home page after successful login
+      # Check if the user is required to reset their password
+      if user['force_password_reset'] == 1
+        # If forced password reset, clear the session and redirect to reset page
+        session[:user_id] = nil
+        flash[:error] = 'Due to a recent security incident, you must reset your password before continuing.'
+        redirect '/reset_password'  # Redirect to reset password page
+      else
+        # Login successful: Set session and redirect to home/dashboard
+        session[:user_id] = user['id']
+        flash[:notice] = 'You were successfully logged in.'
+        redirect '/'  # Redirect to home page (or dashboard) after successful login
+      end
     else
       # Login failed: Invalid credentials (user not found or password mismatch)
       error = 'Invalid username or password.'
@@ -40,9 +48,10 @@ post '/api/login' do
   end
 
   # If any error occurred (validation, DB, credentials), re-render login form
-  flash.now[:error] = error # Use flash.now for rendering within the same request cycle
-  erb :login, locals: { error: error } # Pass error for compatibility if view uses it directly
+  flash.now[:error] = error  # Use flash.now for rendering within the same request cycle
+  erb :login, locals: { error: error }  # Pass error for compatibility if view uses it directly
 end
+
 
 # GET /api/logout - Handle logout action
 get '/api/logout' do
@@ -125,5 +134,93 @@ post '/api/register' do
         email: params[:email]
       }
     end
+  end
+end
+
+# GET /reset_password - form to enter new password
+get '/reset_password' do
+  erb :reset_password
+end
+
+# POST /reset_password - handle password reset submission
+post '/reset_password' do
+  new_password = params[:password]
+  new_password2 = params[:password2]
+  token = params[:token] # optional if you're using email tokens
+
+  if new_password.blank? || new_password2.blank?
+    flash[:error] = 'Both password fields are required.'
+    redirect '/reset_password'
+  elsif new_password != new_password2
+    flash[:error] = 'Passwords do not match.'
+    redirect '/reset_password'
+  else
+    user = current_user
+    if user
+      hashed = hash_password(new_password)
+      db.execute("UPDATE users SET password = ?, force_password_reset = 0 WHERE id = ?", [hashed, user['id']])
+      flash[:notice] = 'Password successfully reset. You can now log in.'
+      settings.logger.info "User #{user['username']} reset their password after breach"
+      redirect '/login'
+    else
+      flash[:error] = 'You must be logged in to reset your password.'
+      redirect '/login'
+    end
+  end
+end
+
+require 'securerandom'
+
+post '/api/request_reset_password' do
+  email = params[:email]
+
+  user = db.execute("SELECT * FROM users WHERE email = ?", [email]).first
+
+  if user
+    reset_token = SecureRandom.hex(32)  # Generate a random token
+    expiration = (Time.now + 3600).to_s # Token expiration time (1 hour from now)
+
+    # Store the token and expiration in the database
+    db.execute("UPDATE users SET reset_token = ?, reset_token_expiration = ? WHERE id = ?", [reset_token, expiration, user['id']])
+
+    # Send the reset link (you can replace this with actual email logic)
+    puts "Send this link to the user: https://your-app.com/reset_password?token=#{reset_token}"
+    
+    flash[:notice] = "Password reset instructions sent."
+  else
+    flash[:error] = "Email not found."
+  end
+
+  redirect '/login'
+end
+
+get '/reset_password' do
+  token = params[:token]
+
+  user = db.execute("SELECT * FROM users WHERE reset_token = ?", [token]).first
+
+  if user && Time.now < Time.parse(user['reset_token_expiration'])
+    erb :reset_password_form # Render reset password form
+  else
+    flash[:error] = "Invalid or expired token."
+    redirect '/login'
+  end
+end
+
+post '/reset_password' do
+  token = params[:token]
+  new_password = params[:password]
+
+  user = db.execute("SELECT * FROM users WHERE reset_token = ?", [token]).first
+
+  if user && Time.now < Time.parse(user['reset_token_expiration'])
+    # Update the user's password
+    db.execute("UPDATE users SET password = ?, reset_token = NULL, reset_token_expiration = NULL WHERE id = ?", [new_password, user['id']])
+
+    flash[:notice] = "Password successfully reset."
+    redirect '/login'
+  else
+    flash[:error] = "Invalid or expired token."
+    redirect '/login'
   end
 end

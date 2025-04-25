@@ -127,3 +127,19 @@ helpers do
     end
   end
 end
+
+
+
+def require_password_reset
+  if current_user && current_user['force_password_reset'] == 1
+    flash[:error] = 'You must reset your password before continuing.'
+    redirect '/reset_password'
+  end
+end
+
+get '/dashboard' do
+  require_login # Ensure the user is logged in
+  require_password_reset # Block if the user needs a reset
+
+  erb :dashboard
+end

@@ -19,3 +19,13 @@ CREATE TABLE IF NOT EXISTS pages (
     last_updated TIMESTAMP,
     content TEXT NOT NULL
 );
+
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL,
+  force_password_reset INTEGER DEFAULT 0
+);
