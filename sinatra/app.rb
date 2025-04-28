@@ -6,7 +6,9 @@ require 'sinatra/flash'
 require 'sqlite3'
 require 'json'
 require 'sinatra/contrib' # Provides namespace, among other things
-require 'logger' # Make sure this is here
+require 'logger'
+require 'prometheus/client'
+
 
 # --- Utility Dependencies ---
 require 'dotenv/load'     # Loads environment variables from .env file
@@ -25,6 +27,8 @@ default_secret = "default_secret_for_dev_#{SecureRandom.hex(32)}"
 set :session_secret, ENV.fetch('SESSION_SECRET', default_secret) # Added default for safety
 set :root, File.dirname(__FILE__)
 set :views, File.join(settings.root, 'views')
+PROMETHEUS = Prometheus::Client.registry
+
 
 # Register Sinatra extensions
 register Sinatra::Flash
@@ -123,3 +127,74 @@ get '/health' do
   content_type :json
   { status: 'ok' }.to_json
 end
+
+################################################################################
+# Metrics 
+################################################################################
+
+# Counter for total HTTP responses served
+APP_HTTP_RESPONSES_TOTAL = PROMETHEUS.counter(
+  :app_http_responses_total,
+  docstring: 'Total number of HTTP responses sent by the application.'
+)
+
+# Histogram for request duration in seconds (or milliseconds)
+APP_REQUEST_DURATION_SECONDS = PROMETHEUS.histogram(
+  :app_request_duration_seconds,
+  docstring: 'Application request duration distribution in seconds.',
+  # Buckets chosen to capture typical web request times (adjust as needed)
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+)
+
+require 'prometheus/middleware/exporter'
+
+# use Prometheus::Middleware::Exporter
+
+
+
+get '/metrics' do
+@skip_metrics = true
+  begin
+    # Set the Content-Type header manually with semicolons
+    headers['Content-Type'] = 'text/plain; version=0.0.4; charset=utf-8'
+    # Format the registry using the correct marshaller
+    Prometheus::Client::Formats::Text.marshal(PROMETHEUS)
+  rescue => e
+    logger.error "Error generating /metrics: #{e.message} Backtrace: #{e.backtrace.join("\n")}"
+    status 500
+    "Error generating metrics"
+  end
+end
+
+
+before do
+  # Store request start time
+  @request_start_time = Time.now
+
+  # --- Optional: Update Gauges ---
+  # Example: Update CPU Gauge if you implement it
+  # begin
+  #   # Replace with your actual CPU measurement logic
+  #   cpu_percent = get_current_cpu_usage_somehow()
+  #   APP_CPU_LOAD_PERCENT.set(cpu_percent)
+  # rescue => e
+  #   logger.warn "Failed to get CPU usage: #{e.message}"
+  # end
+
+  # Example: Update Active Sessions Gauge (requires session logic)
+  # active_count = get_active_session_count_somehow()
+  # APP_ACTIVE_SESSIONS.set(active_count)
+end
+
+after do
+  return if @skip_metrics
+  # --- Increment Counters & Observe Histograms ---
+  APP_HTTP_RESPONSES_TOTAL.increment
+
+  if @request_start_time
+    # Calculate duration in seconds
+    duration = Time.now - @request_start_time
+    APP_REQUEST_DURATION_SECONDS.observe(duration)
+  end
+end
+

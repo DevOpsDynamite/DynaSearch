@@ -1,0 +1,72 @@
+# monitoring/docker-compose.monitoring.yml
+
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    # Mount the Prometheus configuration file (must contain Option B target config)
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro # Read-only mount for config
+      - prometheus_data:/prometheus # Persistent storage for TSDB
+    # Command to start Prometheus with the specified config and storage path
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle' # Allows hot reloads via API if needed
+    ports:
+      - "9090:9090" # Expose Prometheus web UI
+    networks:
+      - monitor-net # Connect to the monitoring network
+    restart: unless-stopped
+    # Optional: Add resource limits if running on a constrained VM
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.50'
+    #       memory: 512M
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    # Mount persistent storage for Grafana data (configs, dashboards, etc.)
+    volumes:
+      - grafana_data:/var/lib/grafana
+      # Optional but Recommended: Mount provisioning configuration
+      - ./grafana/provisioning/:/etc/grafana/provisioning/:ro # Read-only mount for provisioning
+      # Optional but Recommended: Mount dashboards for provisioning
+      - ./grafana/dashboards/:/var/lib/grafana/dashboards/:ro # Read-only mount for dashboards
+    environment:
+      # Set Grafana admin credentials (CHANGE THE DEFAULT PASSWORD!)
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      # Optional: Set the root URL if Grafana runs behind a reverse proxy or specific domain/path
+      # - GF_SERVER_ROOT_URL=http://monitor.dynasearch.dk/
+      # Optional: Disable anonymous access if desired
+      # - GF_AUTH_ANONYMOUS_ENABLED=false
+    ports:
+      - "3000:3000" # Expose Grafana web UI
+    networks:
+      - monitor-net # Connect to the monitoring network
+    # depends_on: # Basic startup order, doesn't guarantee Prometheus is fully ready
+    #   - prometheus
+    restart: unless-stopped
+    # Optional: Add resource limits
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.50'
+    #       memory: 256M
+
+# Define named volumes for persistent data storage
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+
+# Define the network for the monitoring stack
+networks:
+  monitor-net:
+    driver: bridge # Default bridge driver is sufficient for external scraping
