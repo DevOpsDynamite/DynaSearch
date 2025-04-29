@@ -7,12 +7,7 @@ require 'sqlite3'
 require 'json'
 require 'sinatra/contrib' # Provides namespace, among other things
 require 'logger'
-# --- Prometheus Dependencies --- VVV ---
 require 'prometheus/client'
-require 'prometheus/client/mmap'
-require 'prometheus/client/formats/text'
-require 'prometheus/client/support/ruby_vm'
-# --- Prometheus Dependencies --- ^^^ ---
 
 
 # --- Utility Dependencies ---
@@ -32,26 +27,7 @@ default_secret = "default_secret_for_dev_#{SecureRandom.hex(32)}"
 set :session_secret, ENV.fetch('SESSION_SECRET', default_secret) # Added default for safety
 set :root, File.dirname(__FILE__)
 set :views, File.join(settings.root, 'views')
-
-# --- Prometheus Setup --- VVV ---
 PROMETHEUS = Prometheus::Client.registry
-
-# Initialize Mmap storage for process metrics (CPU, Memory, FD etc.)
-# Ensure the directory (/tmp/prometheus-mmap-metrics by default) is writable
-# by the user running the app ('appuser' in your Dockerfile).
-# The docker-entrypoint.sh might need adjustment if /tmp isn't writable.
-begin
-  Prometheus::Client::Mmap.auto_activate_storage!
-rescue Errno::EACCES => e
-  # Log a warning if the mmap directory isn't writable, metrics won't be collected
-  # Consider creating/chowning the default dir in your Dockerfile or entrypoint
-  warn "WARN: Prometheus mmap storage activation failed (permissions?): #{e.message}. Process metrics (CPU/Mem) might not be collected."
-end
-
-
-# Register default Ruby VM collectors (GC, Threads, etc.)
-Prometheus::Client::Support::RubyVm.register(PROMETHEUS)
-# --- Prometheus Setup --- ^^^ ---
 
 
 # Register Sinatra extensions
@@ -153,7 +129,7 @@ get '/health' do
 end
 
 ################################################################################
-# Metrics
+# Metrics 
 ################################################################################
 
 # Counter for total HTTP responses served
@@ -170,72 +146,55 @@ APP_REQUEST_DURATION_SECONDS = PROMETHEUS.histogram(
   buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
 )
 
-# --- Updated Metrics Endpoint --- VVV ---
+require 'prometheus/middleware/exporter'
+
+# use Prometheus::Middleware::Exporter
+
+
+
 get '/metrics' do
-  @skip_metrics = true # Prevent before/after hooks from running for this request
+@skip_metrics = true
   begin
+    # Set the Content-Type header manually with semicolons
     headers['Content-Type'] = 'text/plain; version=0.0.4; charset=utf-8'
-
-    # Get metrics from the default registry (includes request counters, histograms, Ruby VM stats)
-    default_metrics = Prometheus::Client::Formats::Text.marshal(PROMETHEUS)
-
-    # Get metrics from the mmap storage (includes process_cpu_seconds_total, process_resident_memory_bytes, etc.)
-    mmap_metrics_dir = Prometheus::Client::Mmap.default_metrics_dir
-    mmap_metrics = if Dir.exist?(mmap_metrics_dir)
-                      begin
-                        Prometheus::Client::Formats::Text.marshal_mmap_storage(mmap_metrics_dir)
-                      rescue Errno::EACCES => e
-                        logger.warn "Prometheus mmap directory not readable: #{mmap_metrics_dir}. #{e.message}"
-                        "" # Return empty string if dir not readable
-                      end
-                    else
-                      # This might happen on first startup before any workers write metrics
-                      # Or if auto_activate_storage failed due to permissions earlier.
-                      logger.debug "Prometheus mmap directory not found or accessible: #{mmap_metrics_dir}"
-                      "" # Return empty string if dir doesn't exist
-                    end
-
-    # Combine the metrics text output
-    default_metrics + mmap_metrics
-
+    # Format the registry using the correct marshaller
+    Prometheus::Client::Formats::Text.marshal(PROMETHEUS)
   rescue => e
     logger.error "Error generating /metrics: #{e.message} Backtrace: #{e.backtrace.join("\n")}"
     status 500
     "Error generating metrics"
   end
 end
-# --- Updated Metrics Endpoint --- ^^^ ---
 
 
-# --- Before/After hooks for Request Metrics --- VVV ---
 before do
-  # Skip metrics endpoint itself and potentially other paths if needed
-  pass if request.path_info == '/metrics'
-
   # Store request start time
   @request_start_time = Time.now
 
   # --- Optional: Update Gauges ---
-  # Example: You could add a gauge for active requests
-  # APP_ACTIVE_REQUESTS.increment if defined?(APP_ACTIVE_REQUESTS)
+  # Example: Update CPU Gauge if you implement it
+  # begin
+  #   # Replace with your actual CPU measurement logic
+  #   cpu_percent = get_current_cpu_usage_somehow()
+  #   APP_CPU_LOAD_PERCENT.set(cpu_percent)
+  # rescue => e
+  #   logger.warn "Failed to get CPU usage: #{e.message}"
+  # end
+
+  # Example: Update Active Sessions Gauge (requires session logic)
+  # active_count = get_active_session_count_somehow()
+  # APP_ACTIVE_SESSIONS.set(active_count)
 end
 
 after do
-  # Use the instance variable set in the /metrics route to skip
-  pass if @skip_metrics
-
+  return if @skip_metrics
   # --- Increment Counters & Observe Histograms ---
-  # Labels can be added here, e.g., based on response.status
-  # status_label = { code: response.status.to_s } # Example label
-  APP_HTTP_RESPONSES_TOTAL.increment #(labels: status_label)
+  APP_HTTP_RESPONSES_TOTAL.increment
 
   if @request_start_time
     # Calculate duration in seconds
     duration = Time.now - @request_start_time
-    APP_REQUEST_DURATION_SECONDS.observe(duration) #(labels: status_label)
+    APP_REQUEST_DURATION_SECONDS.observe(duration)
   end
-
-  # Example: Decrement active requests gauge
-  # APP_ACTIVE_REQUESTS.decrement if defined?(APP_ACTIVE_REQUESTS)
 end
-# --- Before/After hooks for Request Metrics --- ^^^ ---
+
