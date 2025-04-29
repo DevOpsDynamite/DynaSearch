@@ -70,6 +70,41 @@ GEM
       racc
     prometheus-client (4.2.4)
       base64
+    prometheus-client-mmap (1.2.9)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.9-aarch64-linux-gnu)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.9-aarch64-linux-musl)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.9-arm64-darwin)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.9-x86_64-darwin)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.9-x86_64-linux-gnu)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
+    prometheus-client-mmap (1.2.9-x86_64-linux-musl)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.109)
     puma (6.6.0)
       nio4r (~> 2.0)
     racc (1.8.1)
@@ -87,6 +122,9 @@ GEM
       rack (>= 3)
     rainbow (3.1.1)
     rake (13.2.1)
+    rake-compiler-dock (1.9.1)
+    rb_sys (0.9.111)
+      rake-compiler-dock (= 1.9.1)
     regexp_parser (2.10.0)
     rubocop (1.72.2)
       json (~> 2.3)
@@ -159,6 +197,7 @@ DEPENDENCIES
   minitest
   nokogiri
   prometheus-client
+  prometheus-client-mmap
   puma (~> 6.6)
   rack-test
   rackup (~> 2.2)
