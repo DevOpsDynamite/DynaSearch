@@ -194,7 +194,7 @@ after do
   if @request_start_time
     # Calculate duration in seconds
     duration = Time.now - @request_start_time
-    APP_REQUEST_DURATION_SECONDS.observe(duration)
+    APP_REQUEST_DURATION_SECONDS.observe(duration, {})
   end
 end
 
