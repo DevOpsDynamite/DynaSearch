@@ -70,7 +70,7 @@ jobs:
           # Copy necessary files using scp
           scp -i ~/.ssh/vm_deploy_key -o StrictHostKeyChecking=no \
             .env.server \
-            docker-compose.prod.yml \
+            sinatra/docker-compose.prod.yml \
             sinatra/nginx/default.conf \
             ${{ env.VM_USER }}@${{ env.VM_HOST }}:${{ env.VM_APP_DIR }}/
 
