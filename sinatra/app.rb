@@ -98,11 +98,10 @@ require_relative 'routes/api'
 not_found do
   status 404
   if request.accept?('application/json')
-    content_type :json
-    { status: 'error', message: 'Resource not found.' }.to_json
-  else
     erb :not_found
-  end
+  else
+    content_type :json
+    { status: 'error', message: 'Resource not found.' }.to_json  end
 end
 
 error do
@@ -164,7 +163,7 @@ end
 # --- Simplified Metrics Endpoint --- ^^^ ---
 
 
-# --- Before/After hooks for Request Metrics --- VVV ---
+# --- Before/After hooks for Request Metrics 
 before do
   pass if request.path_info == '/metrics'
   @request_start_time = Time.now
@@ -178,7 +177,7 @@ after do
   if @request_start_time
     duration = Time.now - @request_start_time
     # Use the standard single-argument observe method
-    APP_REQUEST_DURATION_SECONDS.observe(duration) # <<< REVERTED to single argument
+    APP_REQUEST_DURATION_SECONDS.observe(duration) 
   end
 end
 # --- Before/After hooks for Request Metrics --- ^^^ ---
