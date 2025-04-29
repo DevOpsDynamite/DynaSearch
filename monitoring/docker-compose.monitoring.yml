@@ -6,7 +6,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
-    # Mount the Prometheus configuration file (must contain Option B target config)
+    # Mount the Prometheus configuration file
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro # Read-only mount for config
       - prometheus_data:/prometheus # Persistent storage for TSDB

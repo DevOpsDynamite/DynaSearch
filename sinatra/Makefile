@@ -30,3 +30,6 @@ docker-prod-up:
 docker-test:
 	docker compose -f docker-compose.dev.yml run --rm app bundle exec rspec
 
+docker-logs-app:
+	docker compose -f docker-compose.prod.yml logs app
+
