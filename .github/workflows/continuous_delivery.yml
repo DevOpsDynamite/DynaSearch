@@ -2,7 +2,7 @@ name: Continuous Delivery
 on:
   push:
 
-    branches: [ "main", "dev", "feature/monitoring" ] # Added dev branch
+    branches: [ "main"] 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
