@@ -9,7 +9,6 @@ gem 'httparty'
 gem 'nokogiri'
 gem 'puma', '~> 6.6'
 gem 'prometheus-client'
-gem 'prometheus-client-mmap'
 gem 'rackup', '~> 2.2'
 gem 'rake'
 gem 'rubocop', '~> 1.72', require: false
