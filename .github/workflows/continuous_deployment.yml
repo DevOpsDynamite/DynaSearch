@@ -7,7 +7,6 @@ on:
       - completed
     branches: # Only trigger deployment for these branches after build completes
       - main
-      - dev
 
 jobs:
   deploy:
