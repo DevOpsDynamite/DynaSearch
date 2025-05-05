@@ -8,6 +8,9 @@ Following a scan of the DynaSearch application using the [Mozilla HTTP Observato
 
 This document details the steps taken to implement the recommendations and improve the application's security posture, resulting in a significantly improved score.
 
+Find the full scan here:
+https://developer.mozilla.org/en-US/observatory/analyze?host=dynasearch.dk
+
 ## 2. Addressing Observatory Recommendations
 
 ### 2.1. Content Security Policy (CSP) Implementation
