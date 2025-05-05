@@ -9,9 +9,7 @@ require 'sinatra/contrib' # Provides namespace, among other things
 require 'logger'
 # --- Prometheus Dependencies
 require 'prometheus/client'
-require 'prometheus/client/formats/text' 
-
-
+require 'prometheus/client/formats/text'
 
 # --- Utility Dependencies ---
 require 'dotenv/load'     # Loads environment variables from .env file
@@ -29,22 +27,19 @@ set :port, 4568
 # Define the default secret *before* using it
 default_secret = "default_secret_for_dev_#{SecureRandom.hex(32)}"
 
+# Configure and enable sessions using set :sessions
 # This handles enabling sessions and setting all options in one go.
-set :sessions, 
+set :sessions,
     # Use the secret from ENV, falling back to the default
     secret: ENV.fetch('SESSION_SECRET', default_secret),
     # Set the Secure flag ONLY when in production environment
     secure: ENV['RACK_ENV'] == 'production'
 
-
-
 set :root, File.dirname(__FILE__)
 set :views, File.join(settings.root, 'views')
 
-# --- Prometheus Setup 
+# --- Prometheus Setup
 PROMETHEUS = Prometheus::Client.registry
-
-
 
 # Register Sinatra extensions
 register Sinatra::Flash
@@ -52,7 +47,6 @@ register Sinatra::Flash
 ################################################################################
 # Database Configuration & Setup / Logging Configuration
 ################################################################################
-# ... (Keep existing DB, Cache, Logging config) ...
 DB_PATH = if ENV['RACK_ENV'] == 'test'
             File.join(__dir__, 'test', 'test_whoknows.db')
           elsif ENV['DATABASE_PATH']
@@ -88,10 +82,36 @@ configure do
   file_logger.level = Logger::INFO
   set :logger, file_logger
 end
+
+################################################################################
+# Security Headers Middleware (Before Filter)
+################################################################################
+before do
+  # Skip adding headers for the metrics endpoint
+  pass if request.path_info == '/metrics'
+
+  # --- Content Security Policy (CSP) ---
+  # Start with a basic restrictive policy and adjust as needed.
+  # 'self' allows resources from the same origin (your domain).
+  # You might need to add other sources (e.g., CDNs for CSS/JS).
+  # Use browser developer tools (console) to see what's blocked
+  # and refine the policy.
+  headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; object-src 'none'; frame-ancestors 'none';"
+
+  # --- Other useful security headers (Optional but Recommended) ---
+  # Prevents browsers from MIME-sniffing the content-type
+  headers['X-Content-Type-Options'] = 'nosniff'
+  # Provides some protection against clickjacking
+  headers['X-Frame-Options'] = 'DENY' # Or 'SAMEORIGIN'
+  # Enables XSS filtering in older browsers (mostly superseded by CSP)
+  headers['X-XSS-Protection'] = '1; mode=block'
+  # Controls how much referrer info is sent
+  headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+end
+
 ################################################################################
 # Load Helpers & Routes
 ################################################################################
-# ... (Keep existing requires) ...
 require_relative 'helpers/application_helpers'
 require_relative 'routes/pages'
 require_relative 'routes/auth'
@@ -100,15 +120,18 @@ require_relative 'routes/api'
 ################################################################################
 # Global Error Handling Routes
 ################################################################################
-# ... (Keep existing error handlers) ...
 not_found do
   status 404
-  if request.accept?('application/json')
-    erb :not_found
+  # Check if the request likely wants JSON or HTML
+  # Use request.accept?('application/json') for more robust check
+  if request.path_info.start_with?('/api/') || request.accept?('application/json')
+     content_type :json
+    { status: 'error', message: 'Resource not found.' }.to_json
   else
-    content_type :json
-    { status: 'error', message: 'Resource not found.' }.to_json  end
+    erb :not_found # Render HTML 404 page
+  end
 end
+
 
 error do
   status 500
@@ -117,18 +140,20 @@ error do
   settings.logger.error "Unhandled Application Error: #{error_obj&.class} - #{error_message}"
   settings.logger.error error_obj&.backtrace&.join("\n") # Log backtrace too
 
-  if request.accept?('application/json')
+  if request.path_info.start_with?('/api/') || request.accept?('application/json')
     content_type :json
     { status: 'error', message: 'Internal server error.' }.to_json
   else
-    @error_message = error_message
+    @error_message = error_message # Pass message to the view
     begin
-      erb :server_error
-    rescue StandardError
-      '<h1>Internal Server Error</h1><p>Sorry, something went wrong.</p>'
+      erb :server_error # Render HTML 500 page
+    rescue StandardError => e_render # Catch potential errors during error page rendering
+      settings.logger.error "Error rendering 500 page: #{e_render.message}"
+      '<h1>Internal Server Error</h1><p>Sorry, something went wrong, and the error page could not be displayed.</p>'
     end
   end
 end
+
 
 get '/health' do
   content_type :json
@@ -165,11 +190,11 @@ WEATHER_FETCH_FAILURE_TOTAL = PROMETHEUS.counter(
   docstring: 'Total number of failed weather forecast external API fetches.',
   labels: [:reason] # e.g., reason: 'config_error', 'api_error', 'connection_error'
 )
-# --- Simplified Metrics Endpoint --- VVV ---
+# --- Simplified Metrics Endpoint ---
 get '/metrics' do
   @skip_metrics = true # Prevent before/after hooks from running for this request
   begin
-    headers['Content-Type'] = 'text/plain; version=0.0.4; charset=utf-8'
+    content_type 'text/plain; version=0.0.4; charset=utf-8' # Set Content-Type header directly
 
     # Format metrics ONLY from the default registry
     Prometheus::Client::Formats::Text.marshal(PROMETHEUS)
@@ -180,24 +205,26 @@ get '/metrics' do
     "Error generating metrics"
   end
 end
-# --- Simplified Metrics Endpoint --- ^^^ ---
 
-
-# --- Before/After hooks for Request Metrics 
+# --- Before/After hooks for Request Metrics
 before do
+  # Skip metrics recording for the /metrics endpoint itself
   pass if request.path_info == '/metrics'
   @request_start_time = Time.now
 end
 
 after do
+  # Skip metrics recording if @skip_metrics is set (e.g., by /metrics route)
   pass if @skip_metrics
 
+  # Increment response counter regardless of duration calculation success
   APP_HTTP_RESPONSES_TOTAL.increment
 
+  # Record duration if start time was captured
   if @request_start_time
     duration = Time.now - @request_start_time
     # Use the standard single-argument observe method
-    APP_REQUEST_DURATION_SECONDS.observe(duration) 
+    APP_REQUEST_DURATION_SECONDS.observe(duration)
   end
 end
-# --- Before/After hooks for Request Metrics --- ^^^ ---
+# --- Before/After hooks for Request Metrics ---
