@@ -1,47 +1,122 @@
-name: Deploy to Dev Environment
+name: Continuous Deployment
 
 on:
   workflow_run:
-    workflows: ["Continuous Delivery"] # Runs after images are created properly
-    branches: [dev]
+    workflows: ["Continuous Delivery"] # Matches the name of your build workflow
     types:
       - completed
+    branches: # Only trigger deployment for these branches after build completes
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Only run deployment if the build workflow ('Continuous Delivery') was successful
+    if: github.event.workflow_run.conclusion == 'success'
+
+    env:
+      # Define reusable variables
+      VM_USER: ${{ secrets.SSH_USER }}
+      VM_HOST: ${{ secrets.SSH_HOST }}
+      # Define the target directory on the VM
+      VM_APP_DIR: /home/${{ secrets.SSH_USER }}/sinatra-app
+      # Get the branch from the workflow that triggered this run
+      BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.7.0
+        uses: actions/checkout@v4
+        # Fetch the specific commit that triggered the 'Continuous Delivery' workflow
         with:
-          ssh-private-key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Deploy to Azure VM
-        env:
-          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+      - name: Set up SSH Key
         run: |
-          # Copy the docker-compose file and any other necessary files
-          scp -o StrictHostKeyChecking=no sinatra/docker-compose.dev.yml ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/docker-compose.yml
-          scp -o StrictHostKeyChecking=no -r sinatra/nginx ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }}:~/nginx
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/vm_deploy_key
+          chmod 600 ~/.ssh/vm_deploy_key
+          # Optional: Add known hosts entry to avoid prompt - replace VM_HOST if needed
+          # ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_IP }} << EOF
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Determine Docker Image Tag
+        id: set-tag
+        run: |
+          # Default to 'latest' tag for main branch
+          TAG="latest"
+          # Use 'dev-latest' tag for dev branch
+          if [ "${{ env.BRANCH_NAME }}" = "dev" ]; then
+            TAG="dev-latest"
+          fi
+          # Handle other branches if needed, similar to your build workflow logic
+          # elif [ "${{ env.BRANCH_NAME }}" != "main" ]; then
+          #   SAFE_BRANCH=$(echo "${{ env.BRANCH_NAME }}" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+          #   TAG="${SAFE_BRANCH}-latest"
+          # fi
+          echo "DOCKER_TAG=${TAG}" >> $GITHUB_ENV
+          echo "Using tag: ${TAG} for branch ${{ env.BRANCH_NAME }}"
 
-            # Create a dedicated directory for the .env file
-            mkdir -p ~/app-config
-            cd ~/app-config
+      - name: Create .env file for server
+        run: |
+          echo "${{ secrets.SERVER_ENV_FILE }}" > .env.server
 
-            # Create .env file with secrets
-            echo "SESSION_SECRET=$SESSION_SECRET" > .env
+      - name: Transfer files to VM
+        # Using StrictHostKeyChecking=no is common in CI/CD but less secure than adding known_hosts
+        # Ensure the VM_APP_DIR and VM_APP_DIR/nginx exist on the server!
+        run: |
+          # Create target directories on VM if they don't exist
+          ssh -i ~/.ssh/vm_deploy_key -o StrictHostKeyChecking=no ${{ env.VM_USER }}@${{ env.VM_HOST }} "mkdir -p ${{ env.VM_APP_DIR }}/nginx"
 
-            cd ~
+          # Copy necessary files using scp
+          scp -i ~/.ssh/vm_deploy_key -o StrictHostKeyChecking=no \
+            .env.server \
+            sinatra/docker-compose.prod.yml \
+            sinatra/nginx/default.conf \
+            ${{ env.VM_USER }}@${{ env.VM_HOST }}:${{ env.VM_APP_DIR }}/
 
-            docker-compose pull
-            docker-compose up -d
-
-            docker image prune -f
+          # Rename .env.server to .env on the VM and nginx config
+          ssh -i ~/.ssh/vm_deploy_key -o StrictHostKeyChecking=no ${{ env.VM_USER }}@${{ env.VM_HOST }} << EOF
+            mv ${{ env.VM_APP_DIR }}/.env.server ${{ env.VM_APP_DIR }}/.env
+            mv ${{ env.VM_APP_DIR }}/default.conf ${{ env.VM_APP_DIR }}/nginx/default.conf
           EOF
+        env:
+          # Pass GHCR creds for potential use inside SSH if needed, though login is separate below
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Deploy on VM via SSH
+        # Using StrictHostKeyChecking=no for simplicity
+        run: |
+          echo "Deploying branch '${{ env.BRANCH_NAME }}' with tag '${{ env.DOCKER_TAG }}' to ${{ env.VM_HOST }}"
+          ssh -i ~/.ssh/vm_deploy_key -o StrictHostKeyChecking=no ${{ env.VM_USER }}@${{ env.VM_HOST }} << EOF
+            # Navigate to the app directory
+            cd ${{ env.VM_APP_DIR }}
+
+            # Log in to GHCR (needed if your package is private)
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+            # Dynamically update the image tag in docker-compose.prod.yml on the server
+            # This assumes your image line looks like: image: ghcr.io/your_user/your_repo:<some_tag>
+            # Adjust the sed command if your image name structure is different
+            echo "Updating compose file with tag: ${{ env.DOCKER_TAG }}"
+            sed -i "s|image: ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:.*|image: ghcr.io/${{ secrets.GHCR_USERNAME }}/sinatra-app:${{ env.DOCKER_TAG }}|" docker-compose.prod.yml
+
+            # Pull the specific images defined in the (updated) compose file
+            # This ensures we get the correct tag (latest or dev-latest)
+            echo "Pulling new images..."
+            docker compose -f docker-compose.prod.yml pull
+
+            # Bring down the old containers and start new ones with the updated images & config
+            # --remove-orphans cleans up containers for services no longer defined
+            echo "Starting services..."
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            # Log out from GHCR
+            docker logout ghcr.io
+
+            # Optional: Clean up unused Docker images to save space
+            echo "Cleaning up old images..."
+            docker image prune -af
+
+            echo "Deployment completed successfully!"
+          EOF
+          
