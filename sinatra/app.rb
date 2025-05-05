@@ -7,12 +7,10 @@ require 'sqlite3'
 require 'json'
 require 'sinatra/contrib' # Provides namespace, among other things
 require 'logger'
-# --- Prometheus Dependencies --- VVV ---
+# --- Prometheus Dependencies
 require 'prometheus/client'
 require 'prometheus/client/formats/text' 
-# --- Prometheus Dependencies --- ^^^ ---
-# <<< REMOVED: require 'prometheus/client/mmap'
-# <<< REMOVED: require 'prometheus/client/support/ruby_vm'
+
 
 
 # --- Utility Dependencies ---
@@ -27,17 +25,25 @@ require 'active_support/core_ext/object/blank' # For present? and blank?
 # --- Application Configuration ---
 set :bind, '0.0.0.0'
 set :port, 4568
-enable :sessions
+
+# Define the default secret *before* using it
 default_secret = "default_secret_for_dev_#{SecureRandom.hex(32)}"
-set :session_secret, ENV.fetch('SESSION_SECRET', default_secret) # Added default for safety
+
+# This handles enabling sessions and setting all options in one go.
+set :sessions, 
+    # Use the secret from ENV, falling back to the default
+    secret: ENV.fetch('SESSION_SECRET', default_secret),
+    # Set the Secure flag ONLY when in production environment
+    secure: ENV['RACK_ENV'] == 'production'
+
+
+
 set :root, File.dirname(__FILE__)
 set :views, File.join(settings.root, 'views')
 
-# --- Prometheus Setup --- VVV ---
+# --- Prometheus Setup 
 PROMETHEUS = Prometheus::Client.registry
-# <<< REMOVED: Prometheus::Client::Mmap.auto_activate_storage!
-# <<< REMOVED: Prometheus::Client::Support::RubyVm.register(PROMETHEUS)
-# --- Prometheus Setup --- ^^^ ---
+
 
 
 # Register Sinatra extensions

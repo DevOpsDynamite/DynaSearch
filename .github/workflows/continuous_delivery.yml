@@ -1,7 +1,6 @@
 name: Continuous Delivery
 on:
   push:
-
     branches: [ "main"] 
 jobs:
   build-and-push:
