@@ -59,5 +59,6 @@ Implementing these changes successfully addressed the critical recommendations f
 
 As a result, the **Mozilla Observatory score improved dramatically from F (50/100) to A+ (110/100)**, indicating a much stronger security posture for the web application.
 
-*(See attached image: HTTP Observatory Report.png showing the A+ 110/100 score)*
+<img width="1224" alt="HTTP Observatory Report" src="https://github.com/user-attachments/assets/46ae969e-90f1-4fe6-ad9d-afcbe5d47320" />
+<img width="1443" alt="HTTP Observatory Report" src="https://github.com/user-attachments/assets/525eac4c-5c9c-4e82-940f-3b40851d3e53" />
 
