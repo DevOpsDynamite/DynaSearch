@@ -1,7 +1,5 @@
 # monitoring/docker-compose.monitoring.yml
 
-version: '3.8'
-
 services:
   prometheus:
     image: prom/prometheus:latest

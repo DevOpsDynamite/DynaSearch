@@ -9,7 +9,7 @@ require 'sinatra/contrib' # Provides namespace, among other things
 require 'logger'
 # --- Prometheus Dependencies --- VVV ---
 require 'prometheus/client'
-require 'prometheus/client/formats/text' # Keep this for the /metrics endpoint
+require 'prometheus/client/formats/text' 
 # --- Prometheus Dependencies --- ^^^ ---
 # <<< REMOVED: require 'prometheus/client/mmap'
 # <<< REMOVED: require 'prometheus/client/support/ruby_vm'
@@ -145,6 +145,20 @@ APP_REQUEST_DURATION_SECONDS = PROMETHEUS.histogram(
   buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
 )
 
+WEATHER_FETCH_ATTEMPTS_TOTAL = PROMETHEUS.counter(
+  :weather_fetch_attempts_total,
+  docstring: 'Total number of weather forecast external API fetch attempts.'
+)
+
+WEATHER_FETCH_SUCCESS_TOTAL = PROMETHEUS.counter(
+  :weather_fetch_success_total,
+  docstring: 'Total number of successful weather forecast external API fetches.'
+)
+WEATHER_FETCH_FAILURE_TOTAL = PROMETHEUS.counter(
+  :weather_fetch_failure_total,
+  docstring: 'Total number of failed weather forecast external API fetches.',
+  labels: [:reason] # e.g., reason: 'config_error', 'api_error', 'connection_error'
+)
 # --- Simplified Metrics Endpoint --- VVV ---
 get '/metrics' do
   @skip_metrics = true # Prevent before/after hooks from running for this request
