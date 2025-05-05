@@ -87,9 +87,6 @@ GEM
       rack (>= 3)
     rainbow (3.1.1)
     rake (13.2.1)
-    rake-compiler-dock (1.9.1)
-    rb_sys (0.9.111)
-      rake-compiler-dock (= 1.9.1)
     regexp_parser (2.10.0)
     rubocop (1.72.2)
       json (~> 2.3)
@@ -162,7 +159,6 @@ DEPENDENCIES
   minitest
   nokogiri
   prometheus-client
-  prometheus-client-mmap
   puma (~> 6.6)
   rack-test
   rackup (~> 2.2)
