@@ -210,7 +210,7 @@ end
 before do
   # Skip metrics recording for the /metrics endpoint itself
   pass if request.path_info == '/metrics'
-  @request_start_time = Time.now
+  @request_start_time = Time.zone.now
 end
 
 after do
@@ -222,7 +222,7 @@ after do
 
   # Record duration if start time was captured
   if @request_start_time
-    duration = Time.now - @request_start_time
+    duration = Time.zone.now - @request_start_time
     # Use the standard single-argument observe method
     APP_REQUEST_DURATION_SECONDS.observe(duration)
   end
