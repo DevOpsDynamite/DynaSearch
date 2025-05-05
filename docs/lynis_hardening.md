@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This document outlines the steps taken to harden an Azure Ubuntu 24.04 LTS Virtual Machine based on the findings of a `lynis audit system` scan (run on YYYY-MM-DD, using Lynis version 3.0.9, achieving an initial hardening index of 66). The goal is to address key suggestions provided by Lynis to improve the overall security posture of the VM.
+This document outlines the steps taken to harden an Azure Ubuntu 24.04 LTS Virtual Machine based on the findings of a `lynis audit system` scan (run on 2025-05-05, using Lynis version 3.0.9, achieving an initial hardening index of 66). The goal is to address key suggestions provided by Lynis to improve the overall security posture of the VM.
 
 **Environment:**
 * **Cloud Provider:** Microsoft Azure
