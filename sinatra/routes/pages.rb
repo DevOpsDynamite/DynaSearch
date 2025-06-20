@@ -17,6 +17,7 @@ get '/' do
   # Use present? (requires ActiveSupport) to check for nil, empty, or whitespace-only strings
   if q.present?
 
+    EARCHES_TOTAL.increment
     settings.logger.info "User searched (Web): term='#{q}', lang='#{language}'"
 
     # Use squish to normalize whitespace in the SQL query string
