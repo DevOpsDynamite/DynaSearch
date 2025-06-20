@@ -39,9 +39,12 @@ post '/api/login' do
     end
   end
 
-  # If any error occurred (validation, DB, credentials), re-render login form
-  flash.now[:error] = error # Use flash.now for rendering within the same request cycle
-  erb :login, locals: { error: error } # Pass error for compatibility if view uses it directly
+  # If any error occurred (validation, DB, credentials), set flash and re-render login form
+  if error # Check if an error occurred at any point
+    flash.now[:error] = error # Use flash.now for rendering within the same request cycle
+    # Render login form, passing back username for repopulation, but NOT the error local
+    erb :login, locals: { username: params[:username] }
+  end
 end
 
 # GET /api/logout - Handle logout action
@@ -95,12 +98,12 @@ post '/api/register' do
 
   # --- Process Registration or Show Errors ---
   if error
-    # Re-render form with error and submitted values.
+    # Set flash message and re-render form with submitted values (excluding error local).
     flash.now[:error] = error
     erb :register, locals: {
-      error: error,
       username: params[:username], # Pass back original params for form repopulation
       email: params[:email]
+      # Removed error: error
     }
   else
     # --- Create User (only if no errors) ---
@@ -119,10 +122,11 @@ post '/api/register' do
       # Handle potential DB error during insertion
       logger.error "Database error during user insertion for '#{username}': #{e.message}"
       flash.now[:error] = 'An internal error occurred while creating your account. Please try again.'
+      # Render form again, passing back values but NOT the error local
       erb :register, locals: {
-        error: flash.now[:error],
         username: params[:username],
         email: params[:email]
+        # Removed error: flash.now[:error]
       }
     end
   end

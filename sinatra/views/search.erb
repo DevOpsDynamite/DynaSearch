@@ -1,42 +1,25 @@
 <div>
   <input id="search-input" placeholder="Search..." value="<%= params[:q] %>" />
-  <button onclick="makeSearchRequest()">Search</button>
+  <%# Removed onclick attribute and added id="search-button" %>
+  <button id="search-button">Search</button> 
 </div>
 
 <div id="results">
-  <% @search_results.each do |result| %>
+  <%# Check if @search_results is not nil before iterating %>
+  <% @search_results&.each do |result| %>
     <div>
       <h2>
         <a class="search-result-title" href="<%= result['url'] %>">
           <%= result['title'] %>
         </a>
       </h2>
-      <p class="search-result-description">
-        <%= result['description'] %>
-      </p>
+      <%# Check if description key exists and is not blank before trying to display it %>
+      <% if result['description'] && !result['description'].strip.empty? %>
+        <p class="search-result-description">
+          <%= result['description'] %>
+        </p>
+      <% end %>
     </div>
   <% end %>
 </div>
 
-<script>
-  let searchInput;
-
-  document.addEventListener('DOMContentLoaded', () => {
-    searchInput = document.getElementById("search-input");
-    searchInput.focus();
-
-    // Search on Enter
-    searchInput.addEventListener('keypress', (event) => {
-      if (event.key === 'Enter') {
-        makeSearchRequest();
-      }
-    });
-  });
-
-  function makeSearchRequest() {
-    const query = searchInput.value;
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', query);
-    window.location.href = url.toString();
-  }
-</script>

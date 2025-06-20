@@ -135,3 +135,11 @@ html, body {
   color: #3498db;
   font-size: 1.2rem;
 }
+
+#team-photo {
+  height: 100vh; /* Apply the style here */
+  /* You might want to add other styles like max-width */
+  max-width: 100%;
+  display: block; /* Optional: centers image if container is block */
+  margin: 1em auto; /* Optional: adds some margin */
+}

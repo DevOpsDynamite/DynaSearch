@@ -3,6 +3,8 @@
 <head>
   <title>DynaSearch 🧨</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
+  <%# Add link to favicon if you have one in public/ %>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body>
   <div class="page">
@@ -18,21 +20,31 @@
         <% end %>
       </nav>
     </div>
-    
+
+    <%# Display flash notice if present %>
     <% if flash[:notice] %>
       <ul class="flashes">
         <li><%= flash[:notice] %></li>
       </ul>
     <% end %>
 
+     <%# Display flash error if present (Optional, good for login/register errors) %>
+     <% if flash[:error] %>
+      <div class="error">
+        <strong>Error:</strong> <%= flash[:error] %>
+      </div>
+     <% end %>
+
     <div class="body">
       <%= yield %>
     </div>
-    
+
     <div class="footer">
       <span>DynaSearch 🧨 &copy; 2025</span>
       <a href="/about">About</a>
     </div>
   </div>
+  <%# Correct path for script located in public/js/search.js %>
+  <script src="/js/search.js"></script>
 </body>
 </html>
