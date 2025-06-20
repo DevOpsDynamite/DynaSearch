@@ -71,3 +71,8 @@ get '/login' do
   # Render the login view
   erb :login
 end
+
+# GET /sla - Service Level Agreement
+get '/sla' do
+  erb :sla
+end
