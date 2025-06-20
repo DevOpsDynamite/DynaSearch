@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Service Level Agreement (SLA) </title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2em;
+        background: #fafbfc;
+        color: #222;
+      }
+      h1,
+      h2 {
+        color: #2c3e50;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 1em;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      th {
+        background: #f4f4f4;
+      }
+      code {
+        background: #eee;
+        padding: 2px 4px;
+        border-radius: 3px;
+      }
+      ul {
+        margin-top: 0;
+      }
+      .note {
+        color: #888;
+        font-size: 0.95em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Service Level Agreement (SLA)</h1>
+    <p>
+      <strong>Version:</strong> 1.0<br />
+      <strong>Date:</strong> 19/06-2025
+    </p>
+
+    <h2>1. Service Scope</h2>
+    <p>
+      DynaSearch is a search platform that allows users to search a wide range of topics and create personal user accounts to log in and manage their profile. This Service Level Agreement (SLA) applies to the features, functionalities, and services provided by the DynaSearch application as outlined below.
+    </p>
+    <ul>
+      <li>
+        <strong>Service:</strong> The DynaSearch search API and web UI.
+      </li>
+      <li>
+        <strong>Features:</strong> User registration, authentication, search functionality, and web-based results display.
+      </li>
+      <li>
+        <strong>Processes:</strong> Data indexing, query processing, user management, and monitoring.
+      </li>
+    </ul>
+    <p>
+      The platform currently provides search functionality and basic account management only. There are no different account types, premium tiers, or additional services at this time. External API access (such as weather or other data services) is not available under this agreement but may be considered for future development. The service is globally accessible with no regional restrictions.
+    </p>
+
+    <h2>2. Performance Metrics</h2>
+    <p>
+      DynaSearch is committed to providing a reliable and performant search experience. While every reasonable effort will be made to maintain a responsive and stable experience, the following Service Level Indicators (SLIs) and Service Level Objectives (SLOs) define our performance targets. These metrics will be continuously monitored to ensure service quality.
+    </p>
+    <ul>
+      <li>
+        <strong>Target Uptime:</strong> 99.5% per calendar month (excluding scheduled maintenance).
+      </li>
+      <li>
+        <strong>API Response Time:</strong>
+        <ul>
+          <li>95th percentile of <code>/api/*</code> endpoints ≤ 500 ms</li>
+          <li>95th percentile of <code>/*</code> endpoints ≤ 1 s</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Measurement:</strong> Metrics monitored via internal monitoring systems utilizing tools like Prometheus and Grafana.
+      </li>
+    </ul>
+    <p class="note">
+      <strong>Note:</strong> These figures are goals rather than formal commitments, and actual performance may vary depending on network conditions and other external factors.
+    </p>
+
+    <h2>3. Response and Resolution</h2>
+    <p>
+      The DynaSearch team actively monitors performance and aims to provide a responsive experience. The following table outlines target resolution times for different incident severities.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Description</th>
+          <th>Resolution Target</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>P1 (Critical)</td>
+          <td>Service down or major functionality broken (e.g. search, register)</td>
+          <td>24 hours</td>
+        </tr>
+        <tr>
+          <td>P2 (High)</td>
+          <td>Significant degradation (slow responses, partial feature failure)</td>
+          <td>48 hours</td>
+        </tr>
+        <tr>
+          <td>P3 (Normal)</td>
+          <td>Minor issues (UI glitches, non-critical errors)</td>
+          <td>72 hours</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Security Measures</h2>
+    <p>
+      DynaSearch is committed to maintaining a secure environment for its users. The following measures are in place to help protect data and user accounts:
+    </p>
+    <ul>
+      <li>All data transmitted between users and the platform is secured using <strong>HTTPS (SSL/TLS encryption)</strong> to ensure safe transit.</li>
+      <li>User passwords are <strong>securely hashed</strong> before being stored, following best practices to prevent unauthorized access.</li>
+      <li>Regular security updates and vulnerability patching.</li>
+      <li>Role-based access control for sensitive operations.</li>
+      <li>Continuous monitoring and alerting for suspicious activity.</li>
+    </ul>
+    <p>
+      While DynaSearch implements technical safeguards, users are responsible for maintaining the confidentiality of their account credentials and ensuring their accounts remain secure (for example, by choosing strong, unique passwords).
+    </p>
+    <p class="note">
+      <strong>Note:</strong> At this time, DynaSearch does not maintain formal backup procedures for data recovery.
+    </p>
+
+    <h2>5. Compliance Standards</h2>
+    <p>
+      DynaSearch collects only the minimum data necessary for users to create and access an account. This includes a username, email address, and password. No personal names or sensitive personal data are collected.
+    </p>
+    <ul>
+      <li>User data is used solely for the purpose of enabling login functionality and account access. Data is not sold, shared, or used for any other purposes.</li>
+      <li>While DynaSearch does not currently fall under any specific legal compliance frameworks such as GDPR or CCPA, it aims to follow basic principles of user privacy and responsible data handling.</li>
+      <li>Users are responsible for ensuring that their use of the platform complies with any applicable local laws or institutional policies that may apply to them.</li>
+    </ul>
+    <p>
+      To request deletion of your account and credentials, please contact us at contact@dynaSearch.dk
+    </p>
+
+    <h2>6. Exclusions</h2>
+    <ul>
+      <li>Force majeure events (e.g. natural disasters, major internet outages).</li>
+      <li>Third-party outages (e.g. external API providers).</li>
+      <li>Customer network issues or misconfiguration.</li>
+    </ul>
+  </body>
+</html>
