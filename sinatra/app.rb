@@ -123,13 +123,13 @@ require_relative 'routes/api'
 ################################################################################
 not_found do
   status 404
-  # Check if the request likely wants JSON or HTML
-  # Use request.accept?('application/json') for more robust check
-  if request.path_info.start_with?('/api/') || request.accept?('application/json')
-     content_type :json
+  # If the request path starts with /api/, it's an API call, so return JSON.
+  # Otherwise, it's a browser request, so render the HTML 404 page.
+  if request.path_info.start_with?('/api/')
+    content_type :json
     { status: 'error', message: 'Resource not found.' }.to_json
   else
-    erb :not_found # Render HTML 404 page
+    erb :not_found # Render the HTML 404 page
   end
 end
 
