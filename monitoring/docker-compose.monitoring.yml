@@ -1,5 +1,3 @@
-# monitoring/docker-compose.monitoring.yml
-
 services:
   prometheus:
     image: prom/prometheus:latest

@@ -12,6 +12,7 @@ get '/api/search' do
 
   # Use present? (requires ActiveSupport) to check query presence
   if q.present?
+    SEARCHES_TOTAL.increment
     sql = <<-SQL.squish
         SELECT p.*
         FROM pages p

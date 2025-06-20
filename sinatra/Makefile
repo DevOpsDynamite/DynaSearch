@@ -14,7 +14,7 @@ test:
 
 # Bring up the development environment (build image and start containers)
 docker-dev-up:
-	docker compose -f docker-compose.dev.yml up --build
+	docker compose -f docker-compose.local.yml up --build
 
 # Build the production image (similar to what CI does), tagging it for local use
 docker-prod-build:
