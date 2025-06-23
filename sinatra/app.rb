@@ -11,6 +11,7 @@ require 'logger'
 require 'prometheus/client'
 require 'prometheus/client/formats/text'
 
+
 # --- Utility Dependencies ---
 require 'dotenv/load'     # Loads environment variables from .env file
 require 'httparty'        # For making HTTP requests (weather API)
@@ -122,13 +123,13 @@ require_relative 'routes/api'
 ################################################################################
 not_found do
   status 404
-  # Check if the request likely wants JSON or HTML
-  # Use request.accept?('application/json') for more robust check
-  if request.path_info.start_with?('/api/') || request.accept?('application/json')
-     content_type :json
+  # If the request path starts with /api/, it's an API call, so return JSON.
+  # Otherwise, it's a browser request, so render the HTML 404 page.
+  if request.path_info.start_with?('/api/')
+    content_type :json
     { status: 'error', message: 'Resource not found.' }.to_json
   else
-    erb :not_found # Render HTML 404 page
+    erb :not_found # Render the HTML 404 page
   end
 end
 
@@ -185,10 +186,16 @@ WEATHER_FETCH_SUCCESS_TOTAL = PROMETHEUS.counter(
   :weather_fetch_success_total,
   docstring: 'Total number of successful weather forecast external API fetches.'
 )
+
 WEATHER_FETCH_FAILURE_TOTAL = PROMETHEUS.counter(
   :weather_fetch_failure_total,
   docstring: 'Total number of failed weather forecast external API fetches.',
   labels: [:reason] # e.g., reason: 'config_error', 'api_error', 'connection_error'
+)
+
+SEARCHES_TOTAL = PROMETHEUS.counter(
+  :searches_total,
+  docstring: 'Total number of searches performed.'
 )
 # --- Simplified Metrics Endpoint ---
 get '/metrics' do
