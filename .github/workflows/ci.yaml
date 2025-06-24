@@ -64,11 +64,11 @@ jobs:
 
       - name: Auto-correct RuboCop issues
         working-directory: sinatra
-        run: bundle exec rubocop -A || true
+        run: bundle exec rubocop -A 
 
       - name: Run RuboCop
         working-directory: sinatra
-        run: bundle exec rubocop || true
+        run: bundle exec rubocop
 
   # Job 3: Lint Dockerfiles
   lint-docker:
