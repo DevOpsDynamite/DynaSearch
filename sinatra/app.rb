@@ -165,9 +165,10 @@ end
 ################################################################################
 
 # Counter for total HTTP responses served
-APP_HTTP_RESPONSES_TOTAL = PROMETHEUS.counter(
-  :app_http_responses_total,
-  docstring: 'Total number of HTTP responses sent by the application.'
+HTTP_RESPONSES_TOTAL = PROMETHEUS.counter(
+  :http_responses_total,
+  docstring: 'Total number of HTTP responses sent.',
+  labels: [:code, :path]
 )
 
 # Histogram for request duration in seconds (or milliseconds)
@@ -225,7 +226,7 @@ after do
   pass if @skip_metrics
 
   # Increment response counter regardless of duration calculation success
-  APP_HTTP_RESPONSES_TOTAL.increment
+  HTTP_RESPONSES_TOTAL.increment(labels: { code: response.status, path: request.path_info })
 
   # Record duration if start time was captured
   if @request_start_time
