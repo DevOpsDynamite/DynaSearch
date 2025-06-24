@@ -1,0 +1,26 @@
+# Disable specific cops for the entire project
+AllCops:
+  Exclude:
+    - 'db/schema.rb'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+
+# Ignore line length warnings
+Layout/LineLength:
+  Enabled: false
+
+# Ignore warnings about blocks being too long
+Metrics/BlockLength:
+  Enabled: false
+
+# Ignore warnings about methods being too long
+Metrics/MethodLength:
+  Enabled: false
+
+# Ignore warnings about assignment, branch, and condition size
+Metrics/AbcSize:
+  Enabled: false
+
+# Ignore warnings about classes being too long
+Metrics/ClassLength:
+  Enabled: false
