@@ -33,3 +33,11 @@ docker-test:
 docker-logs-app:
 	docker compose -f docker-compose.prod.yml logs app
 
+
+docker-search-log:
+	docker exec sinatra-app-app-1 tail -f /app/log/development.log
+
+docker-nginx-logs:
+        docker compose -f docker-compose.prod.yml logs --tail="100" nginx
+
+
